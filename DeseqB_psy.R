@@ -380,6 +380,7 @@ adonis(pca$x ~ treat, data = pca_s, method='eu', na.rm = TRUE)
 
 ###########################################################################################
 # Heatmaps for genes based on expression in each treatment
+
 rldpvals <- read.csv(file="Bpsy2021_RLDandPVALS.csv", row.names=1)
 head(rldpvals)
 rld_site= rldpvals[,1:20]
@@ -398,6 +399,7 @@ length(conds[,1])
 exp=conds[,1:20]
 means=apply(exp,1,mean) 
 explc=exp-means 
+colnames(explc)=c( "Control_1.1", "Control_1", "Control_2.1", "Control_2", "Control_3.1", "Control_3", "Control_4.1", "Control_4", "Cool_1", "Cool_2", "Cool_3", "Cool_4","Heat_1.1", "Heat_1", "Heat_2.1", "Heat_2", "Heat_3.1", "Heat_3", "Heat_4.1", "Heat_4")
 
 ccol=colorRampPalette(rev(c("red","chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
 col0=colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
@@ -415,6 +417,7 @@ length(conds[,1])
 exp=conds[,1:20]
 means=apply(exp,1,mean) 
 explc=exp-means 
+colnames(explc)=c( "Control_1.1", "Control_1", "Control_2.1", "Control_2", "Control_3.1", "Control_3", "Control_4.1", "Control_4", "Cool_1", "Cool_2", "Cool_3", "Cool_4","Heat_1.1", "Heat_1", "Heat_2.1", "Heat_2", "Heat_3.1", "Heat_3", "Heat_4.1", "Heat_4")
 
 ccol=colorRampPalette(rev(c("red","chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
 col0=colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
@@ -423,15 +426,15 @@ pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F)
 
 ##########################################################################################
 #Heatmap for the genes in common
-rldpvals <- read.csv(file="Crep2016_RLDandPVALS.csv", row.names=1)
-head(rldpvals)
-p.val=0.1 # FDR cutoff
-conds=rldpvals[rldpvals$padj.76<=p.val & !is.na(rldpvals$padj.76) & rldpvals$padj.75<=p.val & !is.na(rldpvals$padj.75),]
-rld_data= conds[,c(1:9)]
-head(rld_data)
-nrow(rld_data)
-gg=read.table("Crep454_iso2gene.tab",sep="\t", row.names=1)
-library(pheatmap)
+
+rldpvals <- read.csv(file="Bpsy2021_RLDandPVALS.csv", row.names=1)
+
+p.val=0.1 
+conds=rldpvals[rldpvals$padj.BOTH27<=p.val & !is.na(rldpvals$padj.BOTH27) & rldpvals$padj.BOTH32<=p.val & !is.na(rldpvals$padj.BOTH32),]
+rld_data= conds[,c(1:20)]
+
+gg=read.table("transcript2geneDescription.out.txt",sep="\t", row.names=1)
+
 means=apply(rld_data,1,mean) # means of rows
 explc=rld_data-means # subtracting them
 
