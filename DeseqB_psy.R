@@ -425,31 +425,21 @@ col0=colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(1
 pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F)
 
 ##########################################################################################
+##########################################################################################
 #Heatmap for the genes in common
 
 rldpvals <- read.csv(file="Bpsy2021_RLDandPVALS.csv", row.names=1)
 
 p.val=0.1 
-conds=rldpvals[rldpvals$padj.BOTH27<=p.val & !is.na(rldpvals$padj.BOTH27) & rldpvals$padj.BOTH32<=p.val & !is.na(rldpvals$padj.BOTH32),]
+conds=rldpvals[rldpvals$padj.cool<=p.val & !is.na(rldpvals$padj.cool) & rldpvals$padj.heat<=p.val & !is.na(rldpvals$padj.heat),]
 rld_data= conds[,c(1:20)]
 
-gg=read.table("transcript2geneDescription.out.txt",sep="\t", row.names=1)
 
 means=apply(rld_data,1,mean) # means of rows
 explc=rld_data-means # subtracting them
+colnames(explc)=c( "Control_1.1", "Control_1", "Control_2.1", "Control_2", "Control_3.1", "Control_3", "Control_4.1", "Control_4", "Cool_1", "Cool_2", "Cool_3", "Cool_4","Heat_1.1", "Heat_1", "Heat_2.1", "Heat_2", "Heat_3.1", "Heat_3", "Heat_4.1", "Heat_4")
 
 ccol=colorRampPalette(rev(c("red","chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
 col0=colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
 
-pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F)
-
-# Make annotation table for pheatmap
-ann = data.frame(cond = c('7.5', '7.5', '7.5', '7.6', '7.6', '7.6', '8', '8', '8'))
-rownames(ann) <- names(explc)
-
-# Set colors
-Var1        <- c("darkgoldenrod2",  "darkolivegreen3", "dodgerblue3")
-names(Var1) <- c("7.5", "7.6", "8")
-anno_colors <- list(cond = Var1)
-
-pheatmap(as.matrix(explc),annotation_col=ann,annotation_colors=anno_colors,cex=1.2,color=col0,border_color=NA,clustering_distance_rows="correlation",clustering_distance_cols="correlation", show_rownames=T)
+pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F, main = "Common genes")
