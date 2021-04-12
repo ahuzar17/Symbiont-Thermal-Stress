@@ -385,8 +385,6 @@ rldpvals <- read.csv(file="Bpsy2021_RLDandPVALS.csv", row.names=1)
 head(rldpvals)
 rld_site= rldpvals[,1:20]
 head(rld_site)
-gg=read.table("B_psygmophilum_sequenceID_to_isogroup.tab",sep="\t", row.names=1)
-head(gg)
 
 #Heat map for top 100 DE in heat
 topnum= 100
