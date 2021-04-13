@@ -18,10 +18,10 @@
 install.packages("ape")
 library("ape")
 
-setwd("C:/Users/corey/Downloads/Rscriptanddata/New_Oc9/Gene_Expression")
+setwd("C:/Users/corey/Downloads/Rscriptanddata/New_Oc9/Gene_Expression/Symbiont-Thermal-Stress")
 # Edit these to match your data file names: 
 input="Cool_GO.csv" # two columns of comma-separated values: gene id, continuous measure of significance. To perform standard GO enrichment analysis based on Fisher's exact test, use binary measure (0 or 1, i.e., either sgnificant or not).
-goAnnotations="B_psygmophilum_isogroup_to_GOterm" # two-column, tab-delimited, one line per gene, multiple GO terms separated by semicolon. If you have multiple lines per gene, use nrify_GOtable.pl prior to running this script.
+goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab" # two-column, tab-delimited, one line per gene, multiple GO terms separated by semicolon. If you have multiple lines per gene, use nrify_GOtable.pl prior to running this script.
 goDatabase="go.obo" # download from http://www.geneontology.org/GO.downloads.ontology.shtml
 goDivision="MF" # either MF, or BP, or CC
 source("gomwu.functions.R")
