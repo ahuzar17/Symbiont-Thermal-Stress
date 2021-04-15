@@ -24,7 +24,7 @@ names(countData)=c( "Control_1.1", "Control_1", "Control_2.1", "Control_2", "Con
 ##row.names(countData)=sub("", "isogroup", rownames(countData))
 head(countData)
 #create call data function, not really needed since blind is true
-treat=c( "Control_1.1", "Control_1", "Control_2.1", "Control_2", "Control_3.1", "Control_3", "Control_4.1", "Control_4", "Cool_1", "Cool_2", "Cool_3", "Cool_4","Heat_1.1", "Heat_1", "Heat_2.1", "Heat_2", "Heat_3.1", "Heat_3", "Heat_4.1", "Heat_4")
+treat=c( "Control", "Control", "Control", "Control", "Control", "Control", "Control", "Control", "Cool", "Cool", "Cool", "Cool","Heat", "Heat", "Heat", "Heat", "Heat", "Heat", "Heat", "Heat")
 g=data.frame(treat)
 g
 colData<- g
@@ -35,8 +35,8 @@ dds<-DESeq(dds)
 res<- results(dds)
 #filter for contigs with average(baseMean) >3. gets rid of trash counts that would just be annoying
 res3<-res[res$baseMean>3, ]
-dim(res) #19717
-dim(res3) #12585
+dim(res) #28265
+dim(res3) #15962
 
 #could use vst here instead for large dataset. get rlog data (better transformation when size factors vary across samples)
 rld <- rlogTransformation(dds, blind=TRUE, fitType="local")
@@ -44,11 +44,11 @@ head(rld)
 rld_wg=(assay(rld))
 head(rld_wg)
 nrow(rld_wg)
-#19717
+#28265
 #filter like before
 rldFiltered=(assay(rld))[(rownames((assay(rld))) %in% rownames(res3)),]
 nrow(rldFiltered)
-#12585
+#15962
 write.csv( rldFiltered,file="Bpsy_wgcna_allgenes.csv",quote=F,row.names=T)
 #now we have our filtered data to take into WGCNA
 
@@ -67,26 +67,16 @@ dat$X=NULL
 head(dat)
 names(dat)
 nrow(dat)
-#12585
+#15962
 datExpr0 = as.data.frame(t(dat))
 
 gsg = goodSamplesGenes(datExpr0, verbose = 3);
 gsg$allOK #if TRUE, no outlier genes, if false run the script below
 
-if (!gsg$allOK)
-{if (sum(!gsg$goodGenes)>0)
-  printFlush(paste("Removing genes:", paste(names(datExpr0)[!gsg$goodGenes], collapse= ", ")));
-  if (sum(!gsg$goodSamples)>0)
-    printFlush(paste("Removing samples:", paste(rownames(datExpr0)[!gsg$goodSamples], collapse=", ")))
-  datExpr0= datExpr0[gsg$goodSamples, gsg$goodGenes]
-}
-gsg=goodSamplesGenes(datExpr0, verbose = 3)
-gsg$allOK 
-dim(datExpr0) 
-#12585  No change because there were neevr any outliers
+
 
 ### Outlier detection incorporated into trait measures. check names are correct 
-traitData= read.csv("crep_wgcna_traits.csv", row.names=1)
+traitData= read.csv("Bpsy_Traits_Num.csv", row.names=1)
 dim(traitData)
 head(traitData)
 names(traitData)
@@ -119,6 +109,7 @@ datColors=data.frame(outlierC=outlierColor,traitColors)
 # Plot the sample dendrogram and the colors underneath.
 plotDendroAndColors(sampleTree,groupLabels=names(datColors), colors=datColors,main="Sample dendrogram and trait heatmap")
 
+
 #everything we did above to make plot was pretty standard
 # Remove outlying samples from expression and trait data
 # remove.samples= Z.k<thresholdZ.k | is.na(Z.k)
@@ -126,7 +117,7 @@ plotDendroAndColors(sampleTree,groupLabels=names(datColors), colors=datColors,ma
 # datTraits=datTraits[!remove.samples,]
 
 #we save this because it can take a lot to actually make this with large dataset
-save(datExpr0, datTraits, file="Crep_Samples_Traits_ALL.RData")
+save(datExpr0, datTraits, file="Bpsy_Samples_Traits_ALL.RData")
 
 ################Moving on!  Network construction and module detection - this section can take a lot of time you might consider running it on a cluster for a larger dataset
 library(WGCNA)
@@ -134,7 +125,7 @@ library(flashClust)
 options(stringsAsFactors = FALSE)
 #enableWGCNAThreads use this in base R
 allowWGCNAThreads() 
-lnames = load(file="Crep_Samples_Traits_ALL.RData")
+lnames = load(file="Bpsy_Samples_Traits_ALL.RData")
 
 #Figure out proper SFT
 # Choose a set of soft-thresholding powers
@@ -149,7 +140,7 @@ cex1 = 0.9;
 # Scale-free topology fit index as a function of the soft-thresholding power
 #run lines 153 to 164 together
 plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
-     xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit,signed R^2",type="n",
+     xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit,signed R^2",type="n",ylim=c(0,1),
      main = paste("Scale independence"));
 text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
      labels=powers,cex=cex1,col="red");
@@ -161,7 +152,7 @@ plot(sft$fitIndices[,1], sft$fitIndices[,5],
      main = paste("Mean connectivity"))
 text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 
-softPower=11 #smallest value to plateau at ~0.85
+softPower=9 #smallest value to plateau at ~0.85
 adjacency=adjacency(datExpr0, power=softPower,type="signed") #must change method type here too!!
 #translate the adjacency into topological overlap matrix and calculate the corresponding dissimilarity:
 TOM= TOMsimilarity(adjacency,TOMType = "signed")
@@ -179,16 +170,9 @@ minModuleSize=90 #we only want large modules
 dynamicMods= cutreeDynamic(dendro= geneTree, distM= dissTOM, deepSplit=2, pamRespectsDendro= FALSE, minClusterSize= minModuleSize)
 table(dynamicMods)
 
-# # dynamicMods
 #dynamicMods
-#1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19 
-#1164  576  415  325  272  263  259  258  249  244  241  236  232  222  219  212  206  198  192 
-#20   21   22   23   24   25   26   27   28   29   30   31   32   33   34   35   36   37   38 
-#185  184  183  182  180  178  177  176  175  172  170  165  163  158  158  157  157  153  152 
-#39   40   41   42   43   44   45   46   47   48   49   50   51   52   53   54   55   56   57 
-#150  145  144  141  137  137  135  134  133  133  131  130  129  126  123  118  118  116  112 
-#58   59   60   61   62   63   64   65   66 
-#111  104  100   99   97   96   94   93   91
+#1    2    3    4    5    6    7    8    9   10   11   12   13   14 
+#3940 1974 1781 1604 1139 1047  955  920  784  744  458  218  207  191 
 
 dynamicColors= labels2colors(dynamicMods)
 #plot dendrogram and colors underneath, pretty sweet
@@ -197,16 +181,16 @@ plotDendroAndColors(geneTree, dynamicColors, "Dynamic Tree Cut", dendroLabels= F
 
 #Merg modules whose expression profiles are very similar
 #calculate eigengenes
-MEList= moduleEigengenes(datExpr0, colors= dynamicColors,softPower = 13)
+MEList= moduleEigengenes(datExpr0, colors= dynamicColors,softPower = 9)
 MEs= MEList$eigengenes
 #Calculate dissimilarity of module eigenegenes
 MEDiss= 1-cor(MEs)
 #Cluster module eigengenes
 METree= flashClust(as.dist(MEDiss), method= "average")
 
-save(dynamicMods, MEList, MEs, MEDiss, METree, file= "Network_crep_nomerge.RData")
+save(dynamicMods, MEList, MEs, MEDiss, METree, file= "Network_bpsy_nomerge.RData")
 
-lnames = load(file = "Network_crep_nomerge.RData")
+lnames = load(file = "Network_bpsy_nomerge.RData")
 #plot
 sizeGrWindow(7,6)
 plot(METree, main= "Clustering of module eigengenes", xlab= "", sub= "")
@@ -224,7 +208,7 @@ plotDendroAndColors(geneTree, cbind(dynamicColors, mergedColors), c("Dynamic Tre
 dev.off()
 
 moduleColors= mergedColors
-colorOrder= c("grey", standardColors(50))
+colorOrder= c("turquoise", standardColors(50))
 moduleLabels= match(moduleColors, colorOrder)-1
 MEs=mergedMEs
 
@@ -236,12 +220,12 @@ library(WGCNA)
 # The following setting is important, do not omit.
 options(stringsAsFactors = FALSE);
 # Load the expression and trait data saved in the first part
-lnames = load(file = "Crep_Samples_Traits_ALL.RData");
+lnames = load(file = "Bpsy_Samples_Traits_ALL.RData");
 #The variable lnames contains the names of loaded variables.
 lnames
 # Load network data saved in the second part.
 lnames = load(file = "Network_signed_0.6.RData");
-lnames = load(file = "Network_crep_nomerge.RData");
+lnames = load(file = "Network_bpsy_nomerge.RData");
 lnames
 
 nGenes = ncol(datExpr0)
@@ -249,10 +233,8 @@ nSamples = nrow(datExpr0)
 table(moduleColors)
 
 #moduleColors
-#black         blue       coral2     darkgrey  floralwhite       grey60        ivory 
-#1338         2928         1167         1088          895          206          564 
-#mediumorchid   orangered4       purple    steelblue 
-#478         1557          615         1749 
+#brown        cyan greenyellow     magenta   turquoise 
+#4731         191        3176        2659        5205 
 
 # Recalculate MEs with color labels
 MEs0 = moduleEigengenes(datExpr0, moduleColors)$eigengenes
@@ -286,8 +268,8 @@ labeledHeatmap(Matrix = moduleTraitCor,
 
 #Gene relationship to trait and important modules:
 # Define variable weight containing the weight column of datTrait - leave weight as variable, but change names in first 2 commands
-weight = as.data.frame(datTraits$pH7.6); #change Lipidrobust to your trait name
-names(weight) = "pH7.6" #change based on the module you are running below
+weight = as.data.frame(datTraits$Cool); #change Lipidrobust to your trait name
+names(weight) = "Cool" #change based on the module you are running below
 # names (colors) of the modules
 modNames = substring(names(MEs), 3)
 geneModuleMembership = as.data.frame(cor(datExpr0, MEs, use = "p"));
@@ -301,7 +283,7 @@ names(GSPvalue) = paste("p.GS.", names(weight), sep="")
 
 #Gene-trait significance correlation plots. change module to look at different ones
 # par(mfrow=c(2,3))
-module = "darkgrey"
+module = "turquoise"
 column = match(module, modNames);
 moduleGenes = moduleColors==module;
 sizeGrWindow(7, 7);
@@ -309,31 +291,29 @@ par(mfrow = c(1,1));
 verboseScatterplot(abs(geneModuleMembership[moduleGenes, column]),
                    abs(geneTraitSignificance[moduleGenes, 1]),
                    xlab = paste("ModMem in", module, "module"),
-                   ylab = "Gene Sig for pH7.6",
+                   ylab = "Gene Sig for Cool",
                    main = paste("MM vs. GS\n"),
                    cex.main = 1.2, cex.lab = 1.2, cex.axis = 1.2, col = module)
 
 #Making VSD files by module for GO plot functions
 vs=t(datExpr0)
-cands=names(datExpr0[moduleColors=="darkgrey"]) #black  blue brown green  grey  pink   red 
+cands=names(datExpr0[moduleColors=="turquoise"]) #black  blue brown green  grey  pink   red 
 #looking at genes in this module and subsetting them
 c.vsd=vs[rownames(vs) %in% cands,]
 head(c.vsd)
 nrow(c.vsd) #should correspond to module size
 table(moduleColors)
 #moduleColors
-#black         blue       coral2     darkgrey  floralwhite       grey60        ivory 
-#1338         2928         1167         1088          895          206          564 
-#mediumorchid   orangered4       purple    steelblue 
-#478         1557          615         1749
+#brown        cyan greenyellow     magenta   turquoise 
+#4731         191        3176        2659        5205 
 head(c.vsd)
 #creates csv file with subsetted data
-write.csv(c.vsd,"rlog_MMdarkgrey.csv",quote=F)
+write.csv(c.vsd,"rlog_MMturquoise.csv",quote=F)
 
 ##############################heatmap of module expression with bar plot of eigengene, no resorting of samples...
 #names(dis)
 sizeGrWindow(8,7);
-which.module="darkgrey" #pick module of interest
+which.module="turquoise" #pick module of interest
 ME=MEs[, paste("ME",which.module, sep="")]
 genes=datExpr0[,moduleColors==which.module ] #replace where says subgene below to plot all rather than just subset
 
@@ -351,7 +331,7 @@ barplot(ME, col=which.module, main="", cex.main=2,
 #here we just have binary traits, but if you have a continuous trait this code is cool
 ###not running it today because we have no continuous traits like weight or cholorphyll
 sizeGrWindow(8,7);
-which.module="yellow" #pick module of interest
+which.module="turquoise" #pick module of interest
 which.trait="fvfm" #change trait of interest here
 datTraits=datTraits[order((datTraits$fvfm),decreasing=T),]#change trait of interest here
 
@@ -369,19 +349,19 @@ barplot(trait, col=which.module, main="", cex.main=2,
 #Gene relationship to trait and important modules: Gene Significance and Module membership
 allkME =as.data.frame(signedKME(t(dat), MEs))
 head(allkME)
-vsd=read.csv(file="rlog_MMdarkgrey.csv", row.names=1)
+vsd=read.csv(file="rlog_MMturquoise.csv", row.names=1)
 head(vsd)
-gg=read.table("Crep454_iso2gene.tab", sep="\t")
+gg=read.table("B_psygmophilum_isogroup_to_genename.tab", sep="\t")
 head(gg)
 library(pheatmap)
 
 ############################################
 #top 100 genes
-whichModule="darkgrey"
+whichModule="turquoise"
 top=100
 
 datME=MEs
-vsd <- read.csv("Crep_wgcna_allgenes.csv", row.names=1)
+vsd <- read.csv("Bpsy_wgcna_allgenes.csv", row.names=1)
 head(vsd)
 datExpr=t(vsd)
 modcol=paste("kME",whichModule,sep="")
@@ -416,13 +396,13 @@ pheatmap(hubs,scale="row",col=contrasting,border_color=NA, main=paste(whichModul
 # two ways to do GO: Fischers- every you in the module or not or KME: how well gene belongs, more continuous
 ##########fisher of module vs whole dataset
 library(WGCNA)
-vsd <- read.csv("Crep_wgcna_allgenes.csv", row.names=1)
+vsd <- read.csv("Bpsy_wgcna_allgenes.csv", row.names=1)
 head(vsd)
 options(stringsAsFactors=FALSE)
 data=t(vsd)
 allkME =as.data.frame(signedKME(data, MEs))
 
-whichModule="darkgrey" # name your color and execute to the end
+whichModule="turquoise" # name your color and execute to the end
 
 length(moduleColors)
 inModule=data.frame("module"=rep(0,nrow(vsd)))
@@ -431,13 +411,13 @@ genes=row.names(vsd)[moduleColors == whichModule]
 inModule[genes,1]=1
 sum(inModule[,1]) #should be same number as in darkgrey module
 head(inModule)
-write.csv(inModule,file=paste(whichModule,"_fisher.csv",sep=""),quote=F)
+write.csv(inModule,file=paste(whichModule,"turquoise_fisher.csv",sep=""),quote=F)
 
 ##KME method. input for delta ranks
 modColName=paste("kME",whichModule,sep="")
 modkME=as.data.frame(allkME[,modColName])
 row.names(modkME)=row.names(allkME)
 names(modkME)=modColName
-write.csv(modkME,file=paste(whichModule,"_kME.csv",sep=""),quote=F)
+write.csv(modkME,file=paste(whichModule,"tuqiouse_kME.csv",sep=""),quote=F)
 
 ######--------------------end--------------------#######
