@@ -98,13 +98,17 @@ Let's generate a table and visualize the total counts.
 ```{r}
 totalCounts=colSums(countData)
 totalCounts
-barplot(totalCounts, col=c("green", "green", "green", "green", "green", "green", "green", "green", "blue", "blue", "blue", "blue", "red", "red", "red", "red", "red", "red", "red", "red"), ylab="raw counts")
+barplot(totalCounts, col=c("green", "green", "green", "green", "green", "green", "green", "green", "blue", "blue", "blue", "blue", "red", "red", "red", "red", "red", "red", "red", "red"), ylab="raw counts", main="Total counts of each sample")
 ```
+Figure 1. Total raw counts in each sample. The y-axis shows the total raw number of counts with the x-axis denoting the samples. Each sample group with a different experimental temperature are denoted by colors, where greem is the control, blue is cool, and red is heat. Control_1.1 has the highest raw counts of *B. psygmophilum* out of all 20 sample groups (n=1285858), and Cool_1 has the lowest raw count (n=484972).
+
+Notes: Make the x-axis more clear, which bar belongs to which sample? Green = control, blue = cool etc. Make x-axis vertical?
+
 ```{r}
 min(totalCounts) #484972
 max(totalCounts)  #1285858
 ```
-As mentioned before, both the control and heat group have 8 samples whereas the cool group only has 4 samples. Control_1.1 has the highest raw counts of 1285858, and Cool_1 has the lowest raw count of 484972.
+
 
 Now, let's create the same conditions table and deseq object.
 ```{r}
