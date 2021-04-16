@@ -351,8 +351,7 @@ allkME =as.data.frame(signedKME(t(dat), MEs))
 head(allkME)
 vsd=read.csv(file="rlog_MMturquoise.csv", row.names=1)
 head(vsd)
-gg=read.table("B_psygmophilum_isogroup_to_genename.tab", sep="\t")
-head(gg)
+
 library(pheatmap)
 
 ############################################
@@ -371,22 +370,7 @@ hubs=sorted[1:top,]
 # attaching gene names
 summary(hubs)
 
-##labeling row names with gene names from gg
-gnames=c();counts=0
-for(i in 1:length(hubs[,1])) {
-  if (row.names(hubs)[i] %in% gg$V1) { 
-    counts=counts+1
-    gn=gg[gg$V1==row.names(hubs)[i],2]
-    if (gn %in% gnames) {
-      gn=paste(gn,counts,sep=".")
-    }
-    gnames=append(gnames,gn) 
-  } else { 
-    gnames=append(gnames,i)
-  }
-} 
-row.names(hubs)=gnames
-length(hubs)
+
 
 contrasting = colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
 #quartz()
@@ -411,6 +395,7 @@ genes=row.names(vsd)[moduleColors == whichModule]
 inModule[genes,1]=1
 sum(inModule[,1]) #should be same number as in darkgrey module
 head(inModule)
+row.names(inModule)=sub("", "isogroup", rownames(inModule))
 write.csv(inModule,file=paste(whichModule,"turquoise_fisher.csv",sep=""),quote=F)
 
 ##KME method. input for delta ranks
@@ -418,6 +403,7 @@ modColName=paste("kME",whichModule,sep="")
 modkME=as.data.frame(allkME[,modColName])
 row.names(modkME)=row.names(allkME)
 names(modkME)=modColName
+row.names(modkME)=sub("", "isogroup", rownames(modkME))
 write.csv(modkME,file=paste(whichModule,"tuqiouse_kME.csv",sep=""),quote=F)
 
 ######--------------------end--------------------#######
