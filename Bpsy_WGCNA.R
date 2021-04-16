@@ -267,6 +267,8 @@ labeledHeatmap(Matrix = moduleTraitCor,
                main = paste("Module-trait relationships"))
 
 #Gene relationship to trait and important modules:
+#############################################################################
+#turquoise module
 # Define variable weight containing the weight column of datTrait - leave weight as variable, but change names in first 2 commands
 weight = as.data.frame(datTraits$Cool); #change Lipidrobust to your trait name
 names(weight) = "Cool" #change based on the module you are running below
@@ -280,6 +282,7 @@ geneTraitSignificance = as.data.frame(cor(datExpr0, weight, use = "p"));
 GSPvalue = as.data.frame(corPvalueStudent(as.matrix(geneTraitSignificance), nSamples));
 names(geneTraitSignificance) = paste("GS.", names(weight), sep="");
 names(GSPvalue) = paste("p.GS.", names(weight), sep="")
+
 
 #Gene-trait significance correlation plots. change module to look at different ones
 # par(mfrow=c(2,3))
@@ -406,4 +409,127 @@ names(modkME)=modColName
 row.names(modkME)=sub("", "isogroup", rownames(modkME))
 write.csv(modkME,file=paste(whichModule,"tuqiouse_kME.csv",sep=""),quote=F)
 
+#############################################################################
+#greenyellow module
+
+#Gene relationship to trait and important modules:
+# Define variable weight containing the weight column of datTrait - leave weight as variable, but change names in first 2 commands
+weight = as.data.frame(datTraits$Heat); #change Lipidrobust to your trait name
+names(weight) = "Heat" #change based on the module you are running below
+# names (colors) of the modules
+modNames = substring(names(MEs), 3)
+geneModuleMembership = as.data.frame(cor(datExpr0, MEs, use = "p"));
+MMPvalue = as.data.frame(corPvalueStudent(as.matrix(geneModuleMembership), nSamples));
+names(geneModuleMembership) = paste("MM", modNames, sep="");
+names(MMPvalue) = paste("p.MM", modNames, sep="");
+geneTraitSignificance = as.data.frame(cor(datExpr0, weight, use = "p"));
+GSPvalue = as.data.frame(corPvalueStudent(as.matrix(geneTraitSignificance), nSamples));
+names(geneTraitSignificance) = paste("GS.", names(weight), sep="");
+names(GSPvalue) = paste("p.GS.", names(weight), sep="")
+#Gene-trait significance correlation plots. change module to look at different ones
+# par(mfrow=c(2,3))
+module = "greenyellow"
+column = match(module, modNames);
+moduleGenes = moduleColors==module;
+sizeGrWindow(7, 7);
+par(mfrow = c(1,1));
+verboseScatterplot(abs(geneModuleMembership[moduleGenes, column]),
+                   abs(geneTraitSignificance[moduleGenes, 1]),
+                   xlab = paste("ModMem in", module, "module"),
+                   ylab = "Gene Sig for Cool",
+                   main = paste("MM vs. GS\n"),
+                   cex.main = 1.2, cex.lab = 1.2, cex.axis = 1.2, col = module)
+
+#Making VSD files by module for GO plot functions
+vs=t(datExpr0)
+cands=names(datExpr0[moduleColors=="greenyellow"])  
+#looking at genes in this module and subsetting them
+c.vsd=vs[rownames(vs) %in% cands,]
+head(c.vsd)
+nrow(c.vsd) #should correspond to module size
+table(moduleColors)
+#moduleColors
+#brown        cyan greenyellow     magenta   turquoise 
+#4731         191        3176        2659        5205 
+head(c.vsd)
+#creates csv file with subsetted data
+write.csv(c.vsd,"rlog_MMgreenyellow.csv",quote=F)
+
+##############################heatmap of module expression with bar plot of eigengene, no resorting of samples...
+#names(dis)
+sizeGrWindow(8,7);
+which.module="greenyellow" #pick module of interest
+ME=MEs[, paste("ME",which.module, sep="")]
+genes=datExpr0[,moduleColors==which.module ] #replace where says subgene below to plot all rather than just subset
+
+#quartz()
+# par(mfrow=c(2,1), mar=c(0.3, 5.5, 3, 2))
+par(mfrow=c(2,1), mar=c(0.3, 5.5, 5, 2))
+plotMat(t(scale(genes) ),nrgcols=30,rlabels=F, clabels=rownames(genes), rcols=which.module)
+par(mar=c(5, 4.2, 0, 0.7))
+barplot(ME, col=which.module, main="", cex.main=2,
+        ylab="eigengene expression",xlab="sample")
+#eigengene is overall expression
+#this is a cool plot where you can see that genes in this module are upregulated in the pH7.6 treatment
+
+
+#Gene relationship to trait and important modules: Gene Significance and Module membership
+allkME =as.data.frame(signedKME(t(dat), MEs))
+head(allkME)
+vsd=read.csv(file="rlog_MMgreenyellow.csv", row.names=1)
+head(vsd)
+
+library(pheatmap)
+
+############################################
+#top 100 genes
+whichModule="greenyellow"
+top=100
+
+datME=MEs
+vsd <- read.csv("Bpsy_wgcna_allgenes.csv", row.names=1)
+head(vsd)
+datExpr=t(vsd)
+modcol=paste("kME",whichModule,sep="")
+head(vsd)
+sorted=vsd[order(allkME[,modcol],decreasing=T),]
+hubs=sorted[1:top,]
+# attaching gene names
+summary(hubs)
+
+
+
+contrasting = colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
+#quartz()
+pheatmap(hubs,scale="row",col=contrasting,border_color=NA, main=paste(whichModule,"top",top,"kME",sep=""))
+
+###fisher for GO
+# two ways to do GO: Fischers- every you in the module or not or KME: how well gene belongs, more continuous
+##########fisher of module vs whole dataset
+library(WGCNA)
+vsd <- read.csv("Bpsy_wgcna_allgenes.csv", row.names=1)
+head(vsd)
+options(stringsAsFactors=FALSE)
+data=t(vsd)
+allkME =as.data.frame(signedKME(data, MEs))
+
+whichModule="greenyellow" # name your color and execute to the end
+
+length(moduleColors)
+inModule=data.frame("module"=rep(0,nrow(vsd)))
+row.names(inModule)=row.names(vsd)
+genes=row.names(vsd)[moduleColors == whichModule]
+inModule[genes,1]=1
+sum(inModule[,1]) #should be same number as in darkgrey module
+head(inModule)
+row.names(inModule)=sub("", "isogroup", rownames(inModule))
+write.csv(inModule,file=paste(whichModule,"greenyellow_fisher.csv",sep=""),quote=F)
+
+##KME method. input for delta ranks
+modColName=paste("kME",whichModule,sep="")
+modkME=as.data.frame(allkME[,modColName])
+row.names(modkME)=row.names(allkME)
+names(modkME)=modColName
+row.names(modkME)=sub("", "isogroup", rownames(modkME))
+write.csv(modkME,file=paste(whichModule,"greenyellow_kME.csv",sep=""),quote=F)
 ######--------------------end--------------------#######
