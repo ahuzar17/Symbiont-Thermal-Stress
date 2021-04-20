@@ -21,7 +21,7 @@ library("ape")
 setwd("C:/Users/corey/Downloads/Rscriptanddata/New_Oc9/Gene_Expression/Symbiont-Thermal-Stress")
 
 ###############################################################################
-#WGCNA module turquoise GO division BP
+#WGCNA module cyan GO division BP
 input="cyancyan_fisher.csv" # two columns of comma-separated values: gene id, continuous measure of significance. To perform standard GO enrichment analysis based on Fisher's exact test, use binary measure (0 or 1, i.e., either sgnificant or not).
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab" # two-column, tab-delimited, one line per gene, multiple GO terms separated by semicolon. If you have multiple lines per gene, use nrify_GOtable.pl prior to running this script.
 goDatabase="go.obo" # download from http://www.geneontology.org/GO.downloads.ontology.shtml
@@ -56,7 +56,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 
 ###############################################################################
-#WGCNA module turquoise GO division MF
+#WGCNA module cyan GO division MF
 input="cyancyan_fisher.csv" # two columns of comma-separated values: gene id, continuous measure of significance. To perform standard GO enrichment analysis based on Fisher's exact test, use binary measure (0 or 1, i.e., either sgnificant or not).
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab" # two-column, tab-delimited, one line per gene, multiple GO terms separated by semicolon. If you have multiple lines per gene, use nrify_GOtable.pl prior to running this script.
 goDatabase="go.obo" # download from http://www.geneontology.org/GO.downloads.ontology.shtml
@@ -91,7 +91,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 
 ###############################################################################
-#WGCNA module turquoise GO division CC
+#WGCNA module cyan GO division CC
 input="cyancyan_fisher.csv" # two columns of comma-separated values: gene id, continuous measure of significance. To perform standard GO enrichment analysis based on Fisher's exact test, use binary measure (0 or 1, i.e., either sgnificant or not).
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab" # two-column, tab-delimited, one line per gene, multiple GO terms separated by semicolon. If you have multiple lines per gene, use nrify_GOtable.pl prior to running this script.
 goDatabase="go.obo" # download from http://www.geneontology.org/GO.downloads.ontology.shtml
