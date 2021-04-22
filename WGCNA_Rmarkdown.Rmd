@@ -1,0 +1,42 @@
+---
+title: "WGCNA"
+author: "Elsa Brenner, Alexa Huzar, and Erica Sun"
+date: "4/22/2021"
+output: html_document
+---
+
+# Introduction
+
+A recent study found that when algal symbiont cells (*Breviolum psygmophilum*) are in a coral host (*Oculina arbuscula*), they display a muted response to thermal stress compared to the host itself. This lead to several outstanding questions including whether corals are somehow protecting, or buffering their symbiont cells from stressful temperatures, or perhaps the symbiont cells were non-responsive to the temperatures tested. To answer these questions, *Breviolum psygmophilum* cells were isolated from the same population of coral host and exposed to the same pattern of thermal stress as the corals. Exposing the symbiont cells to the same thermal stress as the corals, but out of symbiosis, will help clarify what role coral hosts plays in the symbiont transcriptomic response to temperature stress. We are comparing differentially gene expression between cold and heat stress to determine what stress causing a stronger response. Additionally, we will compare what GO categories are up- or down-regulated in response to each stress to determine what pathways are activated or repressed. These results can then be compared to the results of the previous study to better understand if the corals are protecting their symbiont cells. 
+
+**R version** 
+
+We used R version R-4.0.3 (Package versions listed below)
+
+```{r, loadlib, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+library(WGCNA) #Version 1.70-3
+library(impute) #Version 1.64.0
+library(flashClust) #Version 1.01-2
+library(DESeq2) #Version  1.30.1
+```
+
+
+# Data preparation
+### First, we must rename and filter our data to get the best results.
+
+We read in our count data file that was created from the raw sequences. Row names were changed to match the row names of the GO term files to allow proper GO enrichment analysis later.  
+```{r}
+countData <- read.table("B_psygmophilum_counts.txt")
+length(countData[,1])
+
+names(countData)=c( "Control_1.1", "Control_1", "Control_2.1", "Control_2", "Control_3.1", "Control_3", "Control_4.1", "Control_4", "Cool_1", "Cool_2", "Cool_3", "Cool_4","Heat_1.1", "Heat_1", "Heat_2.1", "Heat_2", "Heat_3.1", "Heat_3", "Heat_4.1", "Heat_4")
+row.names(countData)=sub("", "isogroup", rownames(countData))
+
+treat=c( "Control", "Control", "Control", "Control", "Control", "Control", "Control", "Control", "Cool", "Cool", "Cool", "Cool","Heat", "Heat", "Heat", "Heat", "Heat", "Heat", "Heat", "Heat")
+g=data.frame(treat)
+g
+colData<- g
+```
+
+
+

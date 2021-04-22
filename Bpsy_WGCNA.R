@@ -21,7 +21,7 @@ length(countData[,1])
 #28265
 #changes names as we did with deseq for ease
 names(countData)=c( "Control_1.1", "Control_1", "Control_2.1", "Control_2", "Control_3.1", "Control_3", "Control_4.1", "Control_4", "Cool_1", "Cool_2", "Cool_3", "Cool_4","Heat_1.1", "Heat_1", "Heat_2.1", "Heat_2", "Heat_3.1", "Heat_3", "Heat_4.1", "Heat_4")
-##row.names(countData)=sub("", "isogroup", rownames(countData))
+row.names(countData)=sub("", "isogroup", rownames(countData))
 head(countData)
 #create call data function, not really needed since blind is true
 treat=c( "Control", "Control", "Control", "Control", "Control", "Control", "Control", "Control", "Cool", "Cool", "Cool", "Cool","Heat", "Heat", "Heat", "Heat", "Heat", "Heat", "Heat", "Heat")
