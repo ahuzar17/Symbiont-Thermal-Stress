@@ -136,7 +136,7 @@ table(rescool$padj<0.05)
 summary(rescool)
 
 ##another way to look at it 
-nrow(rescool[rescool$padj<0.05 & !is.na(rescool$padj),])  # Num significantly differentially expressed genes excluding the no/low count genes   #228
+nrow(rescool[rescool$padj<0.05 & !is.na(rescool$padj),])  # Num significantly differentially expressed genes excluding the no/low count genes   #5834
 
 ### mean of normalized counts. far right is more highly expressed genes, 
 ###more likely to find DE genes a=among those highly expressed. hard to find when low coverage
