@@ -90,8 +90,7 @@ length(countData[,1])
 #28265
 
 names(countData)=c( "Control_1.1", "Control_1", "Control_2.1", "Control_2", "Control_3.1", "Control_3", "Control_4.1", "Control_4", "Cool_1", "Cool_2", "Cool_3", "Cool_4","Heat_1.1", "Heat_1", "Heat_2.1", "Heat_2", "Heat_3.1", "Heat_3", "Heat_4.1", "Heat_4")
-#row.names(countData)=sub("", "isogroup", rownames(countData))
-##ignoring this above step for now because it screwed up the GO analysis
+row.names(countData)=sub("", "isogroup", rownames(countData))
 head(countData)
 ```
 Let's generate a table and visualize the total counts.

@@ -23,7 +23,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            Module=TRUE,Alternative="g" # un-remark this if you are analyzing a SIGNED WGCNA module (values: 0 for not in module genes, kME for in-module genes). In the call to gomwuPlot below, specify absValue=0.001 (count number of "good genes" that fall into the module)
            #	Module=TRUE # un-remark this if you are analyzing an UNSIGNED WGCNA module 
 ) 
-#199 GO terms at 10% FDR
+#102 GO terms at 10% FDR
 # do not continue if the printout shows that no GO terms pass 10% FDR.
 
 
@@ -74,6 +74,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
                   treeHeight=0.5, # height of the hierarchical clustering tree
                   #	colors=c("dodgerblue2","firebrick1","skyblue2","lightcoral") # these are default colors, un-remar and change if needed
 )
+
 
 ###############################################################################
 #WGCNA module brown GO division CC
