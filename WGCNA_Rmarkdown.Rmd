@@ -20,6 +20,7 @@ library(WGCNA) #Version 1.70-3
 library(impute) #Version 1.64.0
 library(flashClust) #Version 1.01-2
 library(DESeq2) #Version  1.30.1
+library(pheatmap) #Version 1.0.12
 ```
 
 
@@ -84,7 +85,6 @@ allowWGCNAThreads()
 dat=read.csv("Bpsy_wgcna_allgenes.csv")
 rownames(dat)<-dat$X
 dat$X=NULL
-head(dat)
 names(dat)
 nrow(dat)
 ```
@@ -111,5 +111,74 @@ datTraits=traitData
 
 table(rownames(datTraits)==rownames(datExpr0))
 ```
+
+Now we create a dendogram and trait heat map showing how linked the gene expression in each sample is. We calculate whole network connectivity and choose signed as we are interested in the direction of gene expression
+```{r}
+A=adjacency(t(datExpr0),type="signed") #default is unsigned, we want signed
+k=as.numeric(apply(A,2,sum))-1
+Z.k=scale(k)
+thresholdZ.k=-2.5 # often -2.5
+outlierColor=ifelse(Z.k<thresholdZ.k,"red","black")
+sampleTree = flashClust(as.dist(1-A), method = "average")
+traitColors=data.frame(numbers2colors(datTraits,signed=FALSE))
+dimnames(traitColors)[[2]]=paste(names(datTraits))
+datColors=data.frame(outlierC=outlierColor,traitColors)
+
+plotDendroAndColors(sampleTree,groupLabels=names(datColors), colors=datColors,main="Sample dendrogram and trait heatmap")
+```
+All samples are most related based on treatment.
+
+**we save this because it can take a lot to actually make this with large dataset**
+```{r}
+save(datExpr0, datTraits, file="Bpsy_Samples_Traits_ALL.RData")
+```
+
+# Network construction and module detection
+
+#### First we figure out the proper soft-thresholding power
+```{r, results='hide',warning=FALSE, error=FALSE, message=FALSE}
+options(stringsAsFactors = FALSE)
+allowWGCNAThreads() 
+lnames = load(file="Bpsy_Samples_Traits_ALL.RData")
+
+powers = c(seq(1,14,by=2), seq(15,30, by=0.5));
+sft = pickSoftThreshold(datExpr0, powerVector = powers, networkType="signed", verbose = 2) 
+```
+
+Now we plot the results from above to determine what soft power we want to choose
+```{r}
+sizeGrWindow(9, 5)
+par(mfrow = c(1,2));
+cex1 = 0.9;
+
+plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+     xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit,signed R^2",type="n",ylim=c(0,1),
+     main = paste("Scale independence"));
+text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+     labels=powers,cex=cex1,col="red");
+abline(h=0.90,col="red")
+plot(sft$fitIndices[,1], sft$fitIndices[,5],
+     xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n",
+     main = paste("Mean connectivity"))
+text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
+```
+We choose the soft power based on where the plot starts to plateau in this case we choose 9.
+
+After choosing a soft power, we calculate adjacency which can be translated into topological overlap matrix which is a separate measure of similarity. 
+```{r, results='hide',warning=FALSE, error=FALSE, message=FALSE}
+softPower=9
+adjacency=adjacency(datExpr0, power=softPower,type="signed")
+#translate the adjacency into topological overlap matrix and calculate the corresponding dissimilarity:
+TOM= TOMsimilarity(adjacency,TOMType = "signed")
+dissTOM= 1-TOM
+```
+
+```{r}
+geneTree= flashClust(as.dist(dissTOM), method="average")
+sizeGrWindow(10,6)
+# pdf(file="dendrogram_thresh16.5_signed_1868.pdf", width=20, height=20)
+plot(geneTree, xlab="", sub="", main= "Gene Clustering on TOM-based dissimilarity", labels= FALSE,hang=0.04)
+```
+
 
 
