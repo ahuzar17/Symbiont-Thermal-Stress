@@ -9,6 +9,8 @@ output: html_document
 
 A recent study found that when algal symbiont cells (*Breviolum psygmophilum*) are in a coral host (*Oculina arbuscula*), they display a muted response to thermal stress compared to the host itself. This lead to several outstanding questions including whether corals are somehow protecting, or buffering their symbiont cells from stressful temperatures, or perhaps the symbiont cells were non-responsive to the temperatures tested. To answer these questions, *Breviolum psygmophilum* cells were isolated from the same population of coral host and exposed to the same pattern of thermal stress as the corals. Exposing the symbiont cells to the same thermal stress as the corals, but out of symbiosis, will help clarify what role coral hosts plays in the symbiont transcriptomic response to temperature stress. We are comparing differentially gene expression between cold and heat stress to determine what stress causing a stronger response. Additionally, we will compare what GO categories are up- or down-regulated in response to each stress to determine what pathways are activated or repressed. These results can then be compared to the results of the previous study to better understand if the corals are protecting their symbiont cells. 
 
+WCGNA analysis incorporates trait data to determine what gene groupings are correlated with different traits. For our data, this allows us to confirm that differential gene expression is due to the different treatments and not due to differences in cell density or growth rate.
+
 **R version** 
 
 We used R version R-4.0.3 (Package versions listed below)
@@ -22,7 +24,7 @@ library(DESeq2) #Version  1.30.1
 
 
 # Data preparation
-### First, we must rename and filter our data to get the best results.
+#### First, we must rename and filter our data to get the best results.
 
 We read in our count data file that was created from the raw sequences. Row names were changed to match the row names of the GO term files to allow proper GO enrichment analysis later.  
 ```{r}
@@ -34,9 +36,80 @@ row.names(countData)=sub("", "isogroup", rownames(countData))
 
 treat=c( "Control", "Control", "Control", "Control", "Control", "Control", "Control", "Control", "Cool", "Cool", "Cool", "Cool","Heat", "Heat", "Heat", "Heat", "Heat", "Heat", "Heat", "Heat")
 g=data.frame(treat)
-g
 colData<- g
 ```
 
+#### We run the same DeSeq object as before but we filter out trash counts
+
+We only kept contigs that with a baseMean <3 which gets rid of low counts that would be annoying
+```{r, warning=FALSE, error=FALSE, message=FALSE}
+dds<-DESeqDataSetFromMatrix(countData=countData, colData=colData, design=~ treat) 
+dds<-DESeq(dds)
+res<- results(dds)
+res3<-res[res$baseMean>3, ]
+dim(res) #28265
+dim(res3) #15962
+```
+This filtered out about 12,000 contigs.
+
+#### Make rlog data
+
+We run an rlog transformation which is a normalization method important for later downstream analysis.
+```{r}
+rld <- rlogTransformation(dds, blind=TRUE, fitType="local")
+rld_wg=(assay(rld))
+nrow(rld_wg)
+```
+
+The above object still has the trash counts so we filter again as we did above.
+```{r}
+rldFiltered=(assay(rld))[(rownames((assay(rld))) %in% rownames(res3)),]
+nrow(rldFiltered)
+```
+
+This data then gets written into a csv file so we can use the data in the WGCNA analysis
+```{r}
+write.csv( rldFiltered,file="Bpsy_wgcna_allgenes.csv",quote=F,row.names=T)
+```
+
+# WGCNA analysis 
+
+#### Data input and cleaning
+
+We read in the data file created above and rename the rows based on the isogroup names.
+```{r}
+options(stringsAsFactors=FALSE)
+allowWGCNAThreads()
+
+dat=read.csv("Bpsy_wgcna_allgenes.csv")
+rownames(dat)<-dat$X
+dat$X=NULL
+head(dat)
+names(dat)
+nrow(dat)
+```
+
+Now we create a data frame to check for outliers. An output of TRUE indicates that there are no outlier genes.
+```{r}
+datExpr0 = as.data.frame(t(dat))
+gsg = goodSamplesGenes(datExpr0, verbose = 3);
+gsg$allOK
+```
+**We found no outliers!**
+
+Now we read in the data file containing trait information. Traits are average cell count, average cells per mL, average cell growth rate, and thermal stress treatment.
+```{r}
+traitData= read.csv("Bpsy_Traits_Num.csv", row.names=1)
+names(traitData)
+```
+
+This makes sure that the row names of our count data and the row names of our trait data are the same to ensure proper alignment of the datasets. This is required for proper anazlying of count data in terms of the traits. If the code returns TRUE, the files are properly aligned. 
+```{r}
+rownames(traitData)=rownames(datExpr0)
+traitData$Sample= NULL 
+datTraits=traitData
+
+table(rownames(datTraits)==rownames(datExpr0))
+```
 
 
