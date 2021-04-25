@@ -69,7 +69,7 @@ nrow(rldFiltered)
 ```
 
 This data then gets written into a csv file so we can use the data in the WGCNA analysis
-```{r}
+```{r, eval=FALSE}
 write.csv( rldFiltered,file="Bpsy_wgcna_allgenes.csv",quote=F,row.names=T)
 ```
 
@@ -126,7 +126,9 @@ datColors=data.frame(outlierC=outlierColor,traitColors)
 
 plotDendroAndColors(sampleTree,groupLabels=names(datColors), colors=datColors,main="Sample dendrogram and trait heatmap")
 ```
-All samples are most related based on treatment.
+
+Figure 2.1 Sample dendrogram and trait heatmap. The top half of the graph shows a dendrogram illustrating how related each sample is. The heatmap of the traits on the bottome half of the graph combined with the dendrogram show that samples are grouped most closely by what treatment they were exposed to. 
+
 
 **we save this because it can take a lot to actually make this with large dataset**
 ```{r}
@@ -162,13 +164,15 @@ plot(sft$fitIndices[,1], sft$fitIndices[,5],
      main = paste("Mean connectivity"))
 text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 ```
-We choose the soft power based on where the plot starts to plateau in this case we choose 9.
+
+Figure 2.2 Plots of scale free topology or mean connectivity versus soft threshold. Based on when both graphs start to plateau, a soft threshold power of 9 was chosen for the downstream analysis. 
+
+#### Calculating similarity
 
 After choosing a soft power, we calculate adjacency which can be translated into topological overlap matrix which is a separate measure of similarity. 
 ```{r, results='hide',warning=FALSE, error=FALSE, message=FALSE}
 softPower=9
 adjacency=adjacency(datExpr0, power=softPower,type="signed")
-#translate the adjacency into topological overlap matrix and calculate the corresponding dissimilarity:
 TOM= TOMsimilarity(adjacency,TOMType = "signed")
 dissTOM= 1-TOM
 ```
@@ -176,9 +180,83 @@ dissTOM= 1-TOM
 ```{r}
 geneTree= flashClust(as.dist(dissTOM), method="average")
 sizeGrWindow(10,6)
-# pdf(file="dendrogram_thresh16.5_signed_1868.pdf", width=20, height=20)
 plot(geneTree, xlab="", sub="", main= "Gene Clustering on TOM-based dissimilarity", labels= FALSE,hang=0.04)
 ```
+
+Figure 2.3 Gene clustering based on TOM dissimilarity. Based on the TOM calculations done above, genes are clustered based on their similarity which is displayed in this dendrogram. Each leaf is a gene and branches that are  grouped together densely are interconnected, highly co-expressed genes.
+
+
+#### Module creation
+
+**Now that we have dendrogram and TOM dissimilarity, we can use these to define modules**
+
+We choose only large modules. We use a hybrid method of dynamic tree cutting that uses both the dendrogram and TOM dissimilairty as inputs to cut and merge modules.
+```{r}
+minModuleSize=90
+dynamicMods= cutreeDynamic(dendro= geneTree, distM= dissTOM, deepSplit=2, pamRespectsDendro= FALSE, minClusterSize= minModuleSize)
+table(dynamicMods)
+```
+
+These modules are assigned colors and graphed underneath the dendrogram. 
+```{r}
+dynamicColors= labels2colors(dynamicMods)
+sizeGrWindow(8,6)
+plotDendroAndColors(geneTree, dynamicColors, "Dynamic Tree Cut", dendroLabels= FALSE, hang=0.03, addGuide= TRUE, guideHang= 0.05, main= "Gene dendrogram and module colors")
+```
+
+Figure 2.4 Dendrogram graphed with moduled membership. After dynamic tree cutting, the gene dendrogram is graphed with the module membership graphed underneath. 
+
+
+We currently have a lot of modules that are likely closely related. Therefore, we want to merge together these modules of similar gene expression profiles to get the best correlations with the different traits. To do this we calculated eigengenes and then calculated the similarity between them. Modules are merged based on a cut value of 0.4 and the new larger modules are saved for additional analysis. 
+```{r}
+MEList= moduleEigengenes(datExpr0, colors= dynamicColors,softPower = 9)
+MEs= MEList$eigengenes
+
+MEDiss= 1-cor(MEs)
+
+METree= flashClust(as.dist(MEDiss), method= "average")
+
+save(dynamicMods, MEList, MEs, MEDiss, METree, file= "Network_bpsy_nomerge.RData")
+
+lnames = load(file = "Network_bpsy_nomerge.RData")
+#plot
+sizeGrWindow(7,6)
+plot(METree, main= "Clustering of module eigengenes", xlab= "", sub= "")
+MEDissThres= 0.4
+abline(h=MEDissThres, col="red")
+
+merge= mergeCloseModules(datExpr0, dynamicColors, cutHeight= MEDissThres, verbose =3)
+
+mergedColors= merge$colors
+mergedMEs= merge$newMEs
+
+plotDendroAndColors(geneTree, cbind(dynamicColors, mergedColors), c("Dynamic Tree Cut", "Merged dynamic"), dendroLabels= FALSE, hang=0.03, addGuide= TRUE, guideHang=0.05)
+dev.off()
+
+moduleColors= mergedColors
+colorOrder= c("turquoise", standardColors(50))
+moduleLabels= match(moduleColors, colorOrder)-1
+MEs=mergedMEs
+
+save(MEs, moduleLabels, moduleColors, geneTree, file= "Network_signed_0.6.RData")
+
+```
+
+Figure 2.5 Clustered module eigengenes. Eigengenes are plotted as a dendrogram with the names of the given modules at each branch. The red line is the cut point of 0.4. Modules below it are merged together based on their branching to create larger modules of similar expression patterns.
+
+
+#### Relating modules to traits
+
+**Now that we have modules of similar gene expression patterns, we want to see how they relate to the different sample traits**
+
+For our dataset, we are testing whether gene expression differences between thermal stress treatment are actually do to those treatments or whether other variables like cell density caused the differential expression.
+
+
+
+
+
+
+
 
 
 
