@@ -330,24 +330,7 @@ barplot(ME, col=which.module, main="", cex.main=2,
 #eigengene is overall expression
 #this is a cool plot where you can see that genes in this module are upregulated in the pH7.6 treatment
 
-##############################heatmap of module expression with bar plot of trait of interest by sample...
-#here we just have binary traits, but if you have a continuous trait this code is cool
-###not running it today because we have no continuous traits like weight or cholorphyll
-sizeGrWindow(8,7);
-which.module="turquoise" #pick module of interest
-which.trait="fvfm" #change trait of interest here
-datTraits=datTraits[order((datTraits$fvfm),decreasing=T),]#change trait of interest here
-
-trait=datTraits[, paste(which.trait)]
-genes=datExpr0[,moduleColors==which.module ] #replace where says subgene below to plot all rather than just subset
-genes=genes[rownames(datTraits),]
-
-#quartz()
-par(mfrow=c(2,1), mar=c(0.3, 5.5, 3, 2))
-plotMat(t(scale(genes) ),nrgcols=30,rlabels=F, clabels=rownames(genes), rcols=which.module)
-par(mar=c(5, 4.2, 0, 0.7))
-barplot(trait, col=which.module, main="", cex.main=2,
-        ylab="fvfm",xlab="sample")#change trait of interest here
+##############################
 
 #Gene relationship to trait and important modules: Gene Significance and Module membership
 allkME =as.data.frame(signedKME(t(dat), MEs))
