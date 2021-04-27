@@ -287,16 +287,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            smallest=5,
            clusterCutHeight=0.25,
            Module=TRUE,Alternative="g"
-) #1 GO terms at 10% FDR
-
-results=gomwuPlot(input,goAnnotations,goDivision,
-                  absValue=0.001,
-                  level1=0.1,
-                  level2=0.05,
-                  level3=0.01,
-                  txtsize=1.2,
-                  treeHeight=0.5,
-)
+) #0 GO terms at 10% FDR
 ```
 Figure 3.8: GO enrichment results for the Turquoise module, looking at Molecular Functions.  Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
