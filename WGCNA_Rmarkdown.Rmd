@@ -138,17 +138,13 @@ save(datExpr0, datTraits, file="Bpsy_Samples_Traits_ALL.RData")
 # Network construction and module detection
 
 #### First we figure out the proper soft-thresholding power
-```{r, results='hide',warning=FALSE, error=FALSE, message=FALSE}
+```{r, fig.keep = 'low', results='hide',warning=FALSE, error=FALSE, message=FALSE}
 options(stringsAsFactors = FALSE)
 allowWGCNAThreads() 
 lnames = load(file="Bpsy_Samples_Traits_ALL.RData")
 
 powers = c(seq(1,14,by=2), seq(15,30, by=0.5));
 sft = pickSoftThreshold(datExpr0, powerVector = powers, networkType="signed", verbose = 2) 
-```
-
-Now we plot the results from above to determine what soft power we want to choose
-```{r}
 sizeGrWindow(9, 5)
 par(mfrow = c(1,2));
 cex1 = 0.9;
@@ -384,7 +380,7 @@ pheatmap(hubs,scale="row",col=contrasting,border_color=NA, main=paste(whichModul
 
 ```
 
-Figure 2.9 Heatmap of top 100 genes in the turquoise module. There is a clear differences in expression pattern between the cool treatment samples and the other treatments. Nearly all the genes are highly up-regulated in the cool samples while the genes are not differentially expressed or slightly downregulated in the heat and control samples
+Figure 2.9 Heatmap of top 100 genes in the turquoise module. There is a clear differences in expression pattern between the cool treatment samples and the other treatments. Nearly all the genes are highly up-regulated in the cool samples while the genes are not differentially expressed or slightly downregulated in the heat and control samples. There are some heat flasks clustered with the controls.
 
 **Lastly, we make fisher and kME files to use in GO enrichment analysis**
 
@@ -764,100 +760,12 @@ write.csv(modkME,file=paste(whichModule,"magenta_kME.csv",sep=""),quote=F)
 
 ```
 
-#### Cyan module 
-
-The cyan module was not highly correlated with any particular module. Its strongest correlation was only 0.45 with the Control treatment. Therefore, we did not plot the gene-trait significance plot. We did run the rest of the WGCNA anaysis so that we could run GO enrichment and see what gene categories were in this module.
-
-**Now we prepare files to make heatmaps of module expression**
-
-First we make VSD files for the module and create a csv file of the rlog data for just our desired module.
-```{r}
-vs=t(datExpr0)
-cands=names(datExpr0[moduleColors=="cyan"]) 
-c.vsd=vs[rownames(vs) %in% cands,]
-nrow(c.vsd) 
-table(moduleColors)
-write.csv(c.vsd,"rlog_MMcyan.csv",quote=F)
-```
-
-We then use this csv file to prepare objects to plot the heatmap of the module. The vsd object specifies the rlog values of each isogroups in each sample. The allkME object assigned kME values to each isogroup for all the modules.
-
-```{r}
-allkME =as.data.frame(signedKME(t(dat), MEs))
-vsd=read.csv(file="rlog_MMcyan.csv", row.names=1)
-```
-**Plots to visualize module gene expression in each sample**
-
-```{r}
-sizeGrWindow(8,7);
-which.module="cyan"
-ME=MEs[, paste("ME",which.module, sep="")]
-genes=datExpr0[,moduleColors==which.module ] 
-
-par(mfrow=c(2,1), mar=c(0.3, 5.5, 5, 2))
-plotMat(t(scale(genes) ),nrgcols=30,rlabels=F, clabels=rownames(genes), rcols=which.module)
-par(mar=c(5, 4.2, 0, 0.7))
-barplot(ME, col=which.module, main="", cex.main=2,
-        ylab="eigengene expression",xlab="sample")
-#eigengene is overall expression
-```
-
-Figure 2.8 Eigengene of turquoise module. Eigengenes show overall expression of the module in each sample. As expected, this module shows differing expression in samples even in the same treatment. This module is most strongly down-regulated in the heat_1.1 sample.
-
-
-Now we make a heatmap of the expression of the top 100 genes in the turquoise module.
-```{r}
-whichModule="cyan"
-top=100
-
-datME=MEs
-vsd <- read.csv("Bpsy_wgcna_allgenes.csv", row.names=1)
-datExpr=t(vsd)
-modcol=paste("kME",whichModule,sep="")
-sorted=vsd[order(allkME[,modcol],decreasing=T),]
-hubs=sorted[1:top,]
-
-contrasting = colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
-#quartz()
-pheatmap(hubs,scale="row",col=contrasting,border_color=NA, main=paste(whichModule,"top",top,"kME",sep=""))
-
-```
-
-Figure 2.9 Heatmap of top 100 genes in the cyan module. Just as in the eigengene, expression patterns differ across samples even in the same treatment. Heat_1.1 is starkly different from all the others, being almost entirely down-regulated. Cool_1 sample shows most similar expression pattern to the heat samples rather than the other cool samples. 
-
-**Lastly, we make fisher and kME files to use in GO enrichment analysis**
-
-The output shows that our data is correct as it gives the total number of isogroups and the number of isogroups in the cool module.
-```{r}
-vsd <- read.csv("Bpsy_wgcna_allgenes.csv", row.names=1)
-options(stringsAsFactors=FALSE)
-data=t(vsd)
-allkME =as.data.frame(signedKME(data, MEs))
-
-whichModule="turquoise"
-
-length(moduleColors)
-inModule=data.frame("module"=rep(0,nrow(vsd)))
-row.names(inModule)=row.names(vsd)
-genes=row.names(vsd)[moduleColors == whichModule]
-inModule[genes,1]=1
-sum(inModule[,1])
-write.csv(inModule,file=paste(whichModule,"cool_fisher.csv",sep=""),quote=F)
-
-##KME method. input for delta ranks
-modColName=paste("kME",whichModule,sep="")
-modkME=as.data.frame(allkME[,modColName])
-row.names(modkME)=row.names(allkME)
-names(modkME)=modColName
-write.csv(modkME,file=paste(whichModule,"cool_kME.csv",sep=""),quote=F)
-
-```
-
 
 # Conclusions
 
+Analyzing gene expression in terms of different traits grouped our samples mainly based on treatment rather than the other trait variables.Merging our gene expression data in terms of similar patterns of expression lead us to have 5 modules. Of those 5, 4 were well correlated with different trait aspects of the experiment. The cyan module showed no strong correlation with any trait so it was not included in subsequent further analysis. The strongest correlations between modules and traits were found with the treatment variables. Although, there were also some strong correlations with average cell counts and average cells per mL. These correlations followed the same direction and similar strength as the heat treatment which is due to higher cell counts being correlated with exposure to higher temperatures. In particular, the brown module cannot be distinguished whether it is a function of high heat or high cell counts as the correlations are too similar. GO enrichment of this module may shed light on this distinction based on the terms in the module.  
 
-clear differences between treatments and modules are mainly treatment based not based on cell density. mention modules correlated with average cell counts too but in same pattern as thermal stress which is likely just do to counts being correlated with treatment. Heat_1.1 is weird
+ Heat_1.1 is weird
 
 
 
