@@ -11,7 +11,7 @@ setwd("/Users/ericasun/Documents/GitHub/Symbiont-Thermal-Stress/") #you will nee
 ```
 
 Install the packages
-```{r}
+```{r, eval=FALSE}
 install.packages('VennDiagram')
 ```
 
@@ -293,15 +293,9 @@ head(rld)
 ```
 
 ## Sample distance heatmap
-The sample distance heatmap shows how similar each sample is.
+Let's create the sample distance heatmap which shows how similar each sample is.
 ```{r}
 sampleDists <- as.matrix(dist(t(rld)))
-heatmap.2(as.matrix(sampleDists), key=F, trace="none",
-          col=colorpanel(100, "black", "white"),
-          margin=c(10, 10), main="Sample Distance Matrix")
-```
-Recreating the same heatmap with colors.
-```{r}
 rldpvals <- read.csv(file="Bpsy2021_RLDandPVALS.csv", row.names=1)
 head(rldpvals)
 rld=rldpvals[,1:20]
@@ -373,6 +367,7 @@ prettyvenn=venn.diagram(
   cat.dist = c(0.08, 0.08),
   cat.pos = 1
 );
+grid.newpage()
 grid.draw(prettyvenn)
 ```
 
@@ -401,7 +396,7 @@ colnames(explc)=c( "Control_1.1", "Control_1", "Control_2.1", "Control_2", "Cont
 ccol=colorRampPalette(rev(c("red","chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
 col0=colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
 
-pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F)
+pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F, main = "Gene Expression of Heat Treatment")
 ```
 Create a heatmap for the top 100 deferentially expressed genes in the cool treatment.
 ```{r}
@@ -420,7 +415,7 @@ colnames(explc)=c( "Control_1.1", "Control_1", "Control_2.1", "Control_2", "Cont
 ccol=colorRampPalette(rev(c("red","chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
 col0=colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
 
-pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F)
+pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F, main = "Gene Expression of Cool Treatment")
 ```
 Lastly, create a heatmap for genes that are common in both treatmennts.
 ```{r}
@@ -438,6 +433,6 @@ colnames(explc)=c( "Control_1.1", "Control_1", "Control_2.1", "Control_2", "Cont
 ccol=colorRampPalette(rev(c("red","chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
 col0=colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
 
-pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F, main = "Common genes")
+pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F, main = "Gene Expression in Common Genes")
 ```
 
