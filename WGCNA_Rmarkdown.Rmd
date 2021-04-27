@@ -114,10 +114,10 @@ table(rownames(datTraits)==rownames(datExpr0))
 
 Now we create a dendogram and trait heat map showing how linked the gene expression in each sample is. We calculate whole network connectivity and choose signed as we are interested in the direction of gene expression
 ```{r}
-A=adjacency(t(datExpr0),type="signed") #default is unsigned, we want signed
+A=adjacency(t(datExpr0),type="signed") 
 k=as.numeric(apply(A,2,sum))-1
 Z.k=scale(k)
-thresholdZ.k=-2.5 # often -2.5
+thresholdZ.k=-2.5 
 outlierColor=ifelse(Z.k<thresholdZ.k,"red","black")
 sampleTree = flashClust(as.dist(1-A), method = "average")
 traitColors=data.frame(numbers2colors(datTraits,signed=FALSE))
@@ -138,14 +138,13 @@ save(datExpr0, datTraits, file="Bpsy_Samples_Traits_ALL.RData")
 # Network construction and module detection
 
 #### First we figure out the proper soft-thresholding power
-```{r, fig.keep = 'low', results='hide',warning=FALSE, error=FALSE, message=FALSE}
+```{r, results='hide',warning=FALSE, error=FALSE, message=FALSE}
 options(stringsAsFactors = FALSE)
 allowWGCNAThreads() 
 lnames = load(file="Bpsy_Samples_Traits_ALL.RData")
 
 powers = c(seq(1,14,by=2), seq(15,30, by=0.5));
 sft = pickSoftThreshold(datExpr0, powerVector = powers, networkType="signed", verbose = 2) 
-sizeGrWindow(9, 5)
 par(mfrow = c(1,2));
 cex1 = 0.9;
 
@@ -173,9 +172,8 @@ TOM= TOMsimilarity(adjacency,TOMType = "signed")
 dissTOM= 1-TOM
 ```
 
-```{r}
+```{r, echo=FALSE}
 geneTree= flashClust(as.dist(dissTOM), method="average")
-sizeGrWindow(10,6)
 plot(geneTree, xlab="", sub="", main= "Gene Clustering on TOM-based dissimilarity", labels= FALSE,hang=0.04)
 ```
 
@@ -196,7 +194,6 @@ table(dynamicMods)
 These modules are assigned colors and graphed underneath the dendrogram. 
 ```{r}
 dynamicColors= labels2colors(dynamicMods)
-sizeGrWindow(8,6)
 plotDendroAndColors(geneTree, dynamicColors, "Dynamic Tree Cut", dendroLabels= FALSE, hang=0.03, addGuide= TRUE, guideHang= 0.05, main= "Gene dendrogram and module colors")
 ```
 
@@ -204,7 +201,7 @@ Figure 2.4 Dendrogram graphed with moduled membership. After dynamic tree cuttin
 
 
 We currently have a lot of modules that are likely closely related. Therefore, we want to merge together these modules of similar gene expression profiles to get the best correlations with the different traits. To do this we calculated eigengenes and then calculated the similarity between them. Modules are merged based on a cut value of 0.4 and the new larger modules are saved for additional analysis. 
-```{r, warning=FALSE, error=FALSE, message=FALSE}
+```{r, results='hide', warning=FALSE, error=FALSE, message=FALSE}
 MEList= moduleEigengenes(datExpr0, colors= dynamicColors,softPower = 9)
 MEs= MEList$eigengenes
 
@@ -215,12 +212,15 @@ METree= flashClust(as.dist(MEDiss), method= "average")
 save(dynamicMods, MEList, MEs, MEDiss, METree, file= "Network_bpsy_nomerge.RData")
 
 lnames = load(file = "Network_bpsy_nomerge.RData")
-#plot
-sizeGrWindow(7,6)
+
 plot(METree, main= "Clustering of module eigengenes", xlab= "", sub= "")
 MEDissThres= 0.4
 abline(h=MEDissThres, col="red")
+```
 
+Figure 2.5 Dendrogram of modules with cut off point. Modules below the cut off value were merged together. These modules were closely related enough to be analyzed together as one.
+
+```{r}
 merge= mergeCloseModules(datExpr0, dynamicColors, cutHeight= MEDissThres, verbose =3)
 
 mergedColors= merge$colors
@@ -269,7 +269,6 @@ MEs = orderMEs(MEs0)
 moduleTraitCor = cor(MEs, datTraits, use = "p");
 moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples);
 
-sizeGrWindow(10,6)
 textMatrix = paste(signif(moduleTraitCor, 2), "\n(",
                    signif(moduleTraitPvalue, 1), ")", sep = "");
 dim(textMatrix) = dim(moduleTraitCor)
@@ -313,7 +312,6 @@ names(GSPvalue) = paste("p.GS.", names(weight), sep="")
 module = "turquoise"
 column = match(module, modNames);
 moduleGenes = moduleColors==module;
-sizeGrWindow(7, 7);
 par(mfrow = c(1,1));
 verboseScatterplot(abs(geneModuleMembership[moduleGenes, column]),
                    abs(geneTraitSignificance[moduleGenes, 1]),
@@ -346,7 +344,6 @@ vsd=read.csv(file="rlog_MMturquoise.csv", row.names=1)
 **Plots to visualize module gene expression in each sample**
 
 ```{r}
-sizeGrWindow(8,7);
 which.module="turquoise"
 ME=MEs[, paste("ME",which.module, sep="")]
 genes=datExpr0[,moduleColors==which.module ] 
@@ -356,7 +353,6 @@ plotMat(t(scale(genes) ),nrgcols=30,rlabels=F, clabels=rownames(genes), rcols=wh
 par(mar=c(5, 4.2, 0, 0.7))
 barplot(ME, col=which.module, main="", cex.main=2,
         ylab="eigengene expression",xlab="sample")
-#eigengene is overall expression
 ```
 
 Figure 2.8 Eigengene of turquoise module. Eigengenes show overall expression of the module in each sample. In each cool flask, the turquoise module is highly expressed while it is less correlated although down-regulated in the other treatments.
@@ -429,7 +425,6 @@ names(GSPvalue) = paste("p.GS.", names(weight), sep="")
 module = "greenyellow"
 column = match(module, modNames);
 moduleGenes = moduleColors==module;
-sizeGrWindow(7, 7);
 par(mfrow = c(1,1));
 verboseScatterplot(abs(geneModuleMembership[moduleGenes, column]),
                    abs(geneTraitSignificance[moduleGenes, 1]),
@@ -462,7 +457,6 @@ vsd=read.csv(file="rlog_MMgreenyellow.csv", row.names=1)
 **Plots to visualize module gene expression in each sample**
 
 ```{r}
-sizeGrWindow(8,7);
 which.module="greenyellow"
 ME=MEs[, paste("ME",which.module, sep="")]
 genes=datExpr0[,moduleColors==which.module ] 
@@ -472,7 +466,6 @@ plotMat(t(scale(genes) ),nrgcols=30,rlabels=F, clabels=rownames(genes), rcols=wh
 par(mar=c(5, 4.2, 0, 0.7))
 barplot(ME, col=which.module, main="", cex.main=2,
         ylab="eigengene expression",xlab="sample")
-#eigengene is overall expression
 ```
 
 Figure 2.11 Eigengene of greenyellow module. Eigengenes show overall expression of the module in each sample. In each heat flask, the greenyellow module is downregulated while it is less correlated although up-regulated in the other treatment samples.
@@ -546,7 +539,6 @@ names(GSPvalue) = paste("p.GS.", names(weight), sep="")
 module = "brown"
 column = match(module, modNames);
 moduleGenes = moduleColors==module;
-sizeGrWindow(7, 7);
 par(mfrow = c(1,1));
 verboseScatterplot(abs(geneModuleMembership[moduleGenes, column]),
                    abs(geneTraitSignificance[moduleGenes, 1]),
@@ -579,7 +571,6 @@ vsd=read.csv(file="rlog_MMbrown.csv", row.names=1)
 **Plots to visualize module gene expression in each sample**
 
 ```{r}
-sizeGrWindow(8,7);
 which.module="brown"
 ME=MEs[, paste("ME",which.module, sep="")]
 genes=datExpr0[,moduleColors==which.module ] 
@@ -589,7 +580,6 @@ plotMat(t(scale(genes) ),nrgcols=30,rlabels=F, clabels=rownames(genes), rcols=wh
 par(mar=c(5, 4.2, 0, 0.7))
 barplot(ME, col=which.module, main="", cex.main=2,
         ylab="eigengene expression",xlab="sample")
-#eigengene is overall expression
 ```
 
 Figure 2.14 Eigengene of brown module. Eigengenes show overall expression of the module in each sample. In each heat flask, the brown module is up-regulated although expression is not even across the different heat samples. It is also shows a high correlation, although lower correlation than with the heat trait, in the cool samples but it is down-regulated.
@@ -608,7 +598,7 @@ sorted=vsd[order(allkME[,modcol],decreasing=T),]
 hubs=sorted[1:top,]
 
 contrasting = colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
-#quartz()
+
 pheatmap(hubs,scale="row",col=contrasting,border_color=NA, main=paste(whichModule,"top",top,"kME",sep=""))
 
 ```
@@ -663,7 +653,6 @@ names(GSPvalue) = paste("p.GS.", names(weight), sep="")
 module = "magenta"
 column = match(module, modNames);
 moduleGenes = moduleColors==module;
-sizeGrWindow(7, 7);
 par(mfrow = c(1,1));
 verboseScatterplot(abs(geneModuleMembership[moduleGenes, column]),
                    abs(geneTraitSignificance[moduleGenes, 1]),
@@ -696,7 +685,6 @@ vsd=read.csv(file="rlog_MMmagenta.csv", row.names=1)
 **Plots to visualize module gene expression in each sample**
 
 ```{r}
-sizeGrWindow(8,7);
 which.module="magenta"
 ME=MEs[, paste("ME",which.module, sep="")]
 genes=datExpr0[,moduleColors==which.module ] 
@@ -706,7 +694,6 @@ plotMat(t(scale(genes) ),nrgcols=30,rlabels=F, clabels=rownames(genes), rcols=wh
 par(mar=c(5, 4.2, 0, 0.7))
 barplot(ME, col=which.module, main="", cex.main=2,
         ylab="eigengene expression",xlab="sample")
-#eigengene is overall expression
 ```
 
 Figure 2.17 Eigengene of magenta module. Eigengenes show overall expression of the module in each sample. In each cool flask, the magenta module is highly down-regulated while it is less correlated although up-regulated in the control treatment. It shows little expression in the heat samples except for some expression in the heat_1.1 sample.
@@ -725,7 +712,7 @@ sorted=vsd[order(allkME[,modcol],decreasing=T),]
 hubs=sorted[1:top,]
 
 contrasting = colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
-#quartz()
+
 pheatmap(hubs,scale="row",col=contrasting,border_color=NA, main=paste(whichModule,"top",top,"kME",sep=""))
 
 ```
