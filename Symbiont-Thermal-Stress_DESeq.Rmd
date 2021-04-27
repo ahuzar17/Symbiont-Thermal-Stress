@@ -152,9 +152,292 @@ summary(rescool)
 ```
 There are 6028 samples removed because of low counts. There are 3200 genes down regulated for the cold treatment, and 3963 genes are up regulated with the padj < 0.1
 
-MA plot. *INSERT FIGURE CAPTION*
+Here is another way to look at up and down regulated genes. Again, we found 3963 genes to be upregulated, and 3200 genes to be downregulated in the cool samples. 
+```{r}
+nrow(rescool[rescool$padj<0.1 & rescool$log2FoldChange > 0 & !is.na(rescool$padj),])
+nrow(rescool[rescool$padj<0.1 & rescool$log2FoldChange < 0 & !is.na(rescool$padj),])
+```
+
+Let's make a MA plot and save the result as dataframe. 
 ```{r}
 plotMA(rescool, main="Cool vs Control")
 plotMA(rescool, main="Cool vs Control", ylim=c(-5,5))
+```
+MA plot. *INSERT FIGURE CAPTION*
+```{r}
+results <- as.data.frame(rescool)
+head(results) #note taht we're getting double isogroup in the names here
+```
+Write a table of the results, and save to your directory as a .csv file.
+```{r}
+#write data in a table
+write.table(rescool, file="Cool_2021.txt", quote=F, sep="\t")
+#read the table back in for GO analysis!
+cd <- read.table("Cool_2021.txt")
+head(cd)
+```
+
+### Making a GO Table for the Cool treatment for MWU
+Taking each isogroup and making ranked p-values with directionality 
+```{r}
+cd
+go_input_Cool = cd %>%
+  tibble::rownames_to_column(var = "iso") %>%
+  mutate(mutated_p = -log(pvalue)) %>%
+  mutate(mutated_p_updown = ifelse(log2FoldChange < 0, mutated_p*-1, mutated_p*1)) %>%
+  na.omit() %>%
+  select(iso, mutated_p_updown)
+head(go_input_Cool)
+colnames(go_input_Cool) <- c("gene", "pval")
+head(go_input_Cool)
+write.csv(go_input_Cool, file="Cool_GO.csv", quote=F, row.names=FALSE)
+```
+## Pairwise comparision of Heat vs. Control
+Let's take a look at the Heat samples. The steps for pairwise comparision for the Heat samples vs. Control is similar to the Cool samples. Here we are starting to look for differentially expressed genes
+```{r}
+colData$heat<-factor(colData$treat, levels=c("Heat","Control"))
+resheat <- results(dds, contrast=c("treat","Heat","Control"))
+```
+Let’s take a look at the number of genes that meet the different thresholds. padj (p-adjusted) takes in account of the comparasions, rather than just looking at one object like p-value. If we’re looking at a large amount of gene, it’s easy to get a false positive just by chance. We have to do multiple test corrections to get the padj value.
+```{r}
+###how many FDR < 10%?
+table(resheat$padj<0.1)
+# 0.1= 5415
+# 0.05= 4330
+# 0.01= 2860
+```
+A summary of the number of genes up and down-regulated relative to the control at a p adjusted value of 0.1
+```{r}
+summary(resheat)
+```
+There are 8768 samples removed because of low counts. There are 2563 genes down regulated for the cold treatment, and 2852 genes are up regulated with the padj < 0.1
+
+Here is another way to look at up and down regulated genes. Again, we found 2852 genes to be upregulated, and 2563 genes to be downregulated in the cool samples. 
+```{r}
+nrow(resheat[resheat$padj<0.1 & resheat$log2FoldChange > 0 & !is.na(resheat$padj),])
+nrow(resheat[resheat$padj<0.1 & resheat$log2FoldChange < 0 & !is.na(resheat$padj),])
+```
+
+Let's make a MA plot and save the result as dataframe. 
+```{r}
+plotMA(resheat, main="Heat vs Control")
+plotMA(resheat, main="Heat vs Control", ylim=c(-5,5))
+```
+MA plot. *INSERT FIGURE CAPTION*
+```{r}
+results2 <- as.data.frame(resheat)
+head(results2)
+#note taht we're getting double isogroup in the names here
+```
+Write a table of the results, and save to your directory as a .csv file.
+```{r}
+#write data in a table
+write.table(resheat, file="Heat_2021.txt", quote=F, sep="\t")
+#read the table back in for GO analysis!
+cd2 <- read.table("Heat_2021.txt")
+head(cd2)
+```
+
+### Making a GO Table for the Heat treatment for MWU
+Taking each isogroup and making ranked p-values with directionality 
+```{r}
+go_input_Heat = cd2 %>%
+  tibble::rownames_to_column(var = "iso") %>%
+  mutate(mutated_p = -log(pvalue)) %>%
+  mutate(mutated_p_updown = ifelse(log2FoldChange < 0, mutated_p*-1, mutated_p*1)) %>%
+  na.omit() %>%
+  select(iso, mutated_p_updown)
+head(go_input_Heat)
+colnames(go_input_Heat) <- c("gene", "pval")
+head(go_input_Heat)
+write.csv(go_input_Heat, file="Heat_GO.csv", quote=F, row.names=FALSE)
+```
+
+## Getting P-values
+Getting the p-values and create a table of the rlogdata and p-values.
+```{r}
+valcool=cbind(rescool$pvalue, rescool$padj)
+head(valcool)
+colnames(valcool)=c("pval.cool", "padj.cool")
+length(valcool[,1])
+table(complete.cases(valcool))
+
+valheat=cbind(resheat$pvalue, resheat$padj)
+head(valheat)
+colnames(valheat)=c("pval.heat", "padj.heat")
+length(valheat[,1])
+table(complete.cases(valheat))
+```
+Normalizing the data, which is important for heatmap and PCA.
+```{r}
+rlog=rlogTransformation(dds, blind=TRUE) 
+rld=assay(rlog)
+head(rld)
+colnames(rld)=paste(colData$treat)
+head(rld)
+length(rld[,1])
+```
+Bind together p-values and rlog data, and write as .csv
+```{r}
+rldpvals=cbind(rld,valcool, valheat)
+head(rldpvals)
+dim(rldpvals)
+# [1] 28265    24
+table(complete.cases(rldpvals))
+#FALSE  TRUE 
+#8768 19497
+write.csv(rldpvals, "Bpsy2021_RLDandPVALS.csv", quote=F)
+
+colnames(rld)=paste(colData$treat)
+head(rld)
+```
+
+## Sample distance heatmap
+The sample distance heatmap shows how similar each sample is.
+```{r}
+sampleDists <- as.matrix(dist(t(rld)))
+heatmap.2(as.matrix(sampleDists), key=F, trace="none",
+          col=colorpanel(100, "black", "white"),
+          margin=c(10, 10), main="Sample Distance Matrix")
+```
+Recreating the same heatmap with colors.
+```{r}
+rldpvals <- read.csv(file="Bpsy2021_RLDandPVALS.csv", row.names=1)
+head(rldpvals)
+rld=rldpvals[,1:20]
+head(rld)
+
+sampleDists <- dist(t(rld))
+sampleDistMatrix <- as.matrix( sampleDists )
+treat=c( "Control", "Control", "Control", "Control", "Control", "Control", "Control", "Control", "Cool", "Cool", "Cool", "Cool","Heat", "Heat", "Heat", "Heat", "Heat", "Heat", "Heat", "Heat")
+colnames(sampleDistMatrix)=paste(treat)
+rownames(sampleDistMatrix)=paste(treat)
+
+heat.colors = colorRampPalette(rev(c("blue","yellow","red")),bias=0.3)(100)
+pheatmap(sampleDistMatrix,color = heat.colors,cex=0.9,border_color=NA,cluster_rows=T,cluster_cols=T, main="Gene Expression Difference Between Cool, Control, and Heat")
+```
+## VENN Diagram
+The Venn diagram includes both up and down regulated genes in common for PC02. First we create a series of genes that are up and down-regulated from each of our earlier pairwise comparisons.
+```{r}
+cool_up=row.names(rescool[rescool$padj<0.1 & !is.na(rescool$padj) & rescool$log2FoldChange>0,])
+length(cool_up) 
+#3963
+cool_down=row.names(rescool[rescool$padj<0.1 & !is.na(rescool$padj) & rescool$log2FoldChange<0,])
+length(cool_down) 
+#3200
+heat_up=row.names(resheat[resheat$padj<0.1 & !is.na(resheat$padj) & resheat$log2FoldChange>0,])
+length(heat_up) 
+#2852
+heat_down=row.names(resheat[resheat$padj<0.1 & !is.na(resheat$padj) & resheat$log2FoldChange<0,])
+length(heat_down) 
+#2563
+```
+Get the overall number of genes with correct p value and no NA
+```{r}
+cool=row.names(rescool[rescool$padj<0.1 & !is.na(rescool$padj),])
+heat=row.names(resheat[resheat$padj<0.1 & !is.na(resheat$padj),])
+```
+We can look at the overall number of up or down genes across the two samples without repeated isogroups. Let's take a look at the up regulated genes without repeated isogroups.
+```{r}
+pdegs1_up=union(heat_up,cool_up)
+length(pdegs1_up)
+```
+Then look at the total number of down regulated genes without repeated isogroups.
+```{r}
+pdegs1_down=union(heat_down,cool_down)
+length(pdegs1_down)
+```
+The total number of genes that are up or down regulated.
+```{r}
+pdegs1=union(cool,heat)
+length(pdegs1)
+```
+Now we're ready to create a Venn diagram.
+```{r}
+candidates=list("Cool"=cool_up, "Heat"=heat_up)
+
+prettyvenn=venn.diagram(
+  x = candidates,
+  filename=NULL,
+  col = "transparent",
+  fill = c("coral2", "forestgreen"),
+  alpha = 0.5,
+  # label.col = c("darkred", "white", "darkgreen", "white", "white", "white", "blue4"),
+  cex = 2.5,
+  fontfamily = "sans",
+  fontface = "bold",
+  cat.default.pos = "text",
+  cat.col = c("darkred", "darkgreen"),
+  cat.cex = 2.5,
+  cat.fontfamily = "sans",
+  cat.dist = c(0.08, 0.08),
+  cat.pos = 1
+);
+grid.draw(prettyvenn)
+```
+
+## Heatmap for Gene EXpression
+First, let's read in the Rld and P-values again.
+```{r}
+rldpvals <- read.csv(file="Bpsy2021_RLDandPVALS.csv", row.names=1)
+head(rldpvals)
+rld_site= rldpvals[,1:20]
+head(rld_site)
+```
+Create a heatmap for the top 100 deferentially expressed genes in the heat treatment.
+```{r}
+topnum= 100
+top100=head(rldpvals[order(rldpvals$padj.heat), ],topnum)
+
+p.val=0.1
+conds=top100[top100$padj.heat<=p.val & !is.na(top100$padj.heat),]
+length(conds[,1])
+
+exp=conds[,1:20]
+means=apply(exp,1,mean) 
+explc=exp-means 
+colnames(explc)=c( "Control_1.1", "Control_1", "Control_2.1", "Control_2", "Control_3.1", "Control_3", "Control_4.1", "Control_4", "Cool_1", "Cool_2", "Cool_3", "Cool_4","Heat_1.1", "Heat_1", "Heat_2.1", "Heat_2", "Heat_3.1", "Heat_3", "Heat_4.1", "Heat_4")
+
+ccol=colorRampPalette(rev(c("red","chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
+col0=colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
+
+pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F)
+```
+Create a heatmap for the top 100 deferentially expressed genes in the cool treatment.
+```{r}
+topnum= 100
+top100=head(rldpvals[order(rldpvals$padj.cool), ],topnum)
+
+p.val=0.1
+conds=top100[top100$padj.cool<=p.val & !is.na(top100$padj.cool),]
+length(conds[,1])
+
+exp=conds[,1:20]
+means=apply(exp,1,mean) 
+explc=exp-means 
+colnames(explc)=c( "Control_1.1", "Control_1", "Control_2.1", "Control_2", "Control_3.1", "Control_3", "Control_4.1", "Control_4", "Cool_1", "Cool_2", "Cool_3", "Cool_4","Heat_1.1", "Heat_1", "Heat_2.1", "Heat_2", "Heat_3.1", "Heat_3", "Heat_4.1", "Heat_4")
+
+ccol=colorRampPalette(rev(c("red","chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
+col0=colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
+
+pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F)
+```
+Lastly, create a heatmap for genes that are common in both treatmennts.
+```{r}
+rldpvals <- read.csv(file="Bpsy2021_RLDandPVALS.csv", row.names=1)
+
+p.val=0.1 
+conds=rldpvals[rldpvals$padj.cool<=p.val & !is.na(rldpvals$padj.cool) & rldpvals$padj.heat<=p.val & !is.na(rldpvals$padj.heat),]
+rld_data= conds[,c(1:20)]
+
+
+means=apply(rld_data,1,mean) # means of rows
+explc=rld_data-means # subtracting them
+colnames(explc)=c( "Control_1.1", "Control_1", "Control_2.1", "Control_2", "Control_3.1", "Control_3", "Control_4.1", "Control_4", "Cool_1", "Cool_2", "Cool_3", "Cool_4","Heat_1.1", "Heat_1", "Heat_2.1", "Heat_2", "Heat_3.1", "Heat_3", "Heat_4.1", "Heat_4")
+
+ccol=colorRampPalette(rev(c("red","chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
+col0=colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(100)
+
+pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F, main = "Common genes")
 ```
 
