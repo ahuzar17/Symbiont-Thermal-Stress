@@ -24,7 +24,7 @@ Let's take a look!
 The first step in any R file is to set your working directory:
 
 ```{r}
-setwd("/usr4/bi594/ebrenner/ondemand/Final Project GIT 2")
+setwd("/usr4/bi594/ahuzar/R/Symbiont-Thermal-Stress")
 ```
 
 Make sure that all of your files from DeSeq and WGCNA are in the same place as you are running GO.  
@@ -274,22 +274,6 @@ Figure 3.7: GO enrichment results for the Turquoise module, looking at Biologica
 
 #### Now just like before, we're going to have to run each module from WGCNA through all three GO divisions.  
 
-```{r echo=FALSE}
-input="turquoiseturquoise_fisher.csv"
-goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab"
-goDatabase="go.obo"
-goDivision="MF"
-source("gomwu.functions.R")
-
-gomwuStats(input, goDatabase, goAnnotations, goDivision,
-           perlPath="perl",
-           largest=0.1,
-           smallest=5,
-           clusterCutHeight=0.25,
-           Module=TRUE,Alternative="g"
-) #0 GO terms at 10% FDR
-```
-Figure 3.8: GO enrichment results for the Turquoise module, looking at Molecular Functions.  Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 ```{r echo=FALSE}
 input="turquoiseturquoise_fisher.csv"
