@@ -37,13 +37,13 @@ Let's start with BP for the cool treatment:
 
 You may need to install the package "ape"
 
-```{r echo=FALSE}
+```{r, echo=FALSE}
 library("ape")
 ```
 
 Next, let's load the correct files:
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 input="Cool_GO.csv" # two columns of comma-separated values: gene id, continuous measure of significance. To perform standard GO enrichment analysis based on Fisher's exact test, use binary measure (0 or 1, i.e., either sgnificant or not).
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab" # two-column, tab-delimited, one line per gene, multiple GO terms separated by semicolon. If you have multiple lines per gene, use nrify_GOtable.pl prior to running this script.
 goDatabase="go.obo" # download from http://www.geneontology.org/GO.downloads.ontology.shtml
@@ -59,7 +59,7 @@ and the "goDivision" is where you specify your disired GO division.  You can see
 
 **The next step is to calculate the stats necessary to create figures.**  
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 gomwuStats(input, goDatabase, goAnnotations, goDivision,
            perlPath="perl", # replace with full path to perl executable if it is not in your system's PATH already
            largest=0.1,  # a GO category will not be considered if it contains more than this fraction of the total number of genes
@@ -82,7 +82,7 @@ If you have GO terms, congrats!! you can now plot your results.  If you do not g
 
 **Next, we're going to plot our results.**
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 results=gomwuPlot(input,goAnnotations,goDivision,
                   #	absValue=-log(0.05,10),  # genes with the measure value exceeding this will be counted as "good genes". Specify absValue=0.001 if you are doing Fisher's exact test for standard GO enrichment or analyzing a WGCNA module (all non-zero genes = "good genes").
                   absValue=1,
@@ -102,7 +102,8 @@ You can leave this plotting block unchanged for each analysis! All this does is 
 ## Let's repeat this for all combinations of treatments and GO divisions! 
 
 **CC for cool treatment**
-```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 input="Cool_GO.csv"
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab"
 goDatabase="go.obo"
@@ -118,7 +119,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
 )
 # 32 GO terms at 10% FDR
 ```
-```{r}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 results=gomwuPlot(input,goAnnotations,goDivision,
                   absValue=1,
                   level1=0.1, 
@@ -132,7 +133,8 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 Figure 3.2: GO enrichment results for the cool treatment, looking at Cellular Componants. There are 32 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  Blue represents downregulation, and red represents upregulation.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 **BP for the cool treatment**
-```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 input="Cool_GO.csv" 
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab" 
 goDatabase="go.obo" 
@@ -147,7 +149,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
 )
 # 44 GO terms at 10% FDR
 ```
-```{r}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 results=gomwuPlot(input,goAnnotations,goDivision,
                   absValue=1,
                   level1=0.1, 
@@ -163,7 +165,8 @@ Figure 3.3: GO enrichment results for the cool treatment, looking at Molecular F
 ### We've finished all GO Divisions for the Cool Treatment, now let's move on to the Heat treatment.  
 
 **BP**
-```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 input="Heat_GO.csv" # Notice we've switched the CSV to the Heat Treatment CSV file.  
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab"
 goDatabase="go.obo" 
@@ -178,7 +181,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
 )
 # 26 GO terms at 10% FDR
 ```
-```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 results=gomwuPlot(input,goAnnotations,goDivision,
                   absValue=1,
                   level1=0.1, 
@@ -191,7 +194,9 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 
 Figure 3.4: GO enrichment results for the heat treatment, looking at Biological Processes. There are 26 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  Blue represents downregulation, and red represents upregulation.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
-```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+**CC**
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 input="Heat_GO.csv"
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab"
 goDatabase="go.obo" 
@@ -207,7 +212,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
 # 25 GO terms at 10% FDR
 ```
 
-```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 results=gomwuPlot(input,goAnnotations,goDivision,
                   absValue=1,
                   level1=0.1,
@@ -220,7 +225,9 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 
 Figure 3.5: GO enrichment results for the heat treatment, looking at Cellular Componants. There are 25 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  Blue represents downregulation, and red represents upregulation.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
-```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+**MF**
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 input="Heat_GO.csv" 
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab" 
 goDatabase="go.obo"
@@ -235,7 +242,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
 )
 # 6 GO terms at 10% FDR
 ```
-```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 results=gomwuPlot(input,goAnnotations,goDivision,
                   absValue=1,
                   level1=0.1,
@@ -250,11 +257,15 @@ Figure 3.6: GO enrichment results for the heat treatment, looking at Molecular F
 
 ## Now we've finished all of our original GO divisions and experimental treatments!  But we're not done with GO...
 
-The above GO analysis uses the information we collected from DeSeq, but we can also apply GO to the outputs of WGCNA analysis.  Looking at the results of WGCNA, we know there were 4 modules of interest: turquoise, greenyellow, magenta, and brown.  We can use a similar code template as before to see the GO functions of the genes within the module. The module are run as Fishers test which simply checks if a GO term is in a module not the direction of expression. Let's take a look at the Turquoise module first: 
+The above GO analysis uses the information we collected from DeSeq, but we can also apply GO to the outputs of WGCNA analysis.  Looking at the results of WGCNA, we know there were 4 modules of interest: turquoise, greenyellow, magenta, and brown.  We can use a similar code template as before to see the GO functions of the genes within the module. The module are run as Fishers test which simply checks if a GO term is in a module not the direction of expression. 
 
-Turquoise if correlated with the cool treatment
+### Let's take a look at the Turquoise module first: 
+
+Turquoise is positively correlated with the cool treatment
+
 **BP**
-```{r}
+
+```{r, message=FALSE, warning=FALSE}
 input="turquoiseturquoise_fisher.csv" # this is the CSV created from WGCNA, the rest of the files are the same as before.  
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab" 
 goDatabase="go.obo"
@@ -269,9 +280,9 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            clusterCutHeight=0.25,
            Module=TRUE,Alternative="g"
 )
-#5 GO terms at 10% FDR
+#3 GO terms at 10% FDR
 ```
-```{r}
+```{r, message=FALSE, warning=FALSE}
 results=gomwuPlot(input,goAnnotations,goDivision,
                   absValue=0.001,
                   level1=0.1,
@@ -282,12 +293,13 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.7: GO enrichment results for the Turquoise module, looking at Biological Processes. There are 5 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
+Figure 3.7: GO enrichment results for the Turquoise module, looking at Biological Processes. There are 3 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 #### Now just like before, we're going to have to run each module from WGCNA through all three GO divisions.  
 
 **Turquoise CC**
-```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 input="turquoiseturquoise_fisher.csv"
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab"
 goDatabase="go.obo"
@@ -317,13 +329,14 @@ Figure 3.9: GO enrichment results for the Turquoise module, looking at Cellular 
 
 There were no GO terms at 10% FDR for turquoise MF.
 
-#### Now we've finished the turquoise module, but we need to run all GO divisions for the other 3 modules.  
+## Now we've finished the turquoise module, but we need to run all GO divisions for the other 3 modules.  
 
-##### GreenYellow:
-Correlated with heat treatment
+### GreenYellow:
+Negatively correlated with heat treatment
 
 **BP**
-```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 input="greenyellowgreenyellow_fisher.csv"
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab"
 goDatabase="go.obo"
@@ -351,7 +364,8 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 Figure 3.10: GO enrichment results for the GreenYellow module, looking at BP. There are 10 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 **MF**
-```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 input="greenyellowgreenyellow_fisher.csv"
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab"
 goDatabase="go.obo"
@@ -379,7 +393,8 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 Figure 3.11: GO enrichment results for the GreenYellow module, looking at MF. There are 5 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 **CC**
-```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 input="greenyellowgreenyellow_fisher.csv"
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab"
 goDatabase="go.obo"
@@ -406,11 +421,12 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 
 Figure 3.12: GO enrichment results for the GreenYellow module, looking at CC. There are 12 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
-##### Magenta:
-Correlated with cool treatment.
+### Magenta:
+Negatively correlated with cool treatment.
 
 **BP**
-```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 input="magentamagenta_fisher.csv" 
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab"
 goDatabase="go.obo"
@@ -438,7 +454,8 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 Figure 3.13: GO enrichment results for the Magenta module, looking at BP. There are 11 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 **MF**
-```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 input="magentamagenta_fisher.csv" 
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab"
 goDatabase="go.obo"
@@ -466,7 +483,8 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 Figure 3.14: GO enrichment results for the Magenta module, looking at MF. There are 7 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 **CC**
-```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 input="magentamagenta_fisher.csv" 
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab"
 goDatabase="go.obo"
@@ -493,13 +511,14 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 
 Figure 3.15: GO enrichment results for the Magenta module, looking at CC. There are 6 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
-##### Brown: 
-Correlated with heat treatment and cell density
+### Brown: 
+Positively correlated with heat treatment and cell density
 
 Now for Brown, we are going to do things a bit differently.  When we ran the code the first time, using the Fisher test, it produced zero GO terms.  So in order to produce results, we switched to using the kME file produced from WGCNA.  You will see that difference reflected in the code below.  
 
 **BP**
-```{r}
+
+```{r, message=FALSE, warning=FALSE}
 input="brownbrown_kME.csv" # here you can see the different file input
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab"
 goDatabase="go.obo"
@@ -512,7 +531,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            smallest=5,
            clusterCutHeight=0.25,
            Module=TRUE,Alternative="g"
-) #192 GO terms at 10% FDR
+) #142 GO terms at 10% FDR
 
 results=gomwuPlot(input,goAnnotations,goDivision,
                   absValue=0.001,
@@ -524,10 +543,11 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.16: GO enrichment results for the Brown module, looking at BP. There are 192 GO terms at 10% FDR.Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.001, and <0.0001.  The fractions to the left do not denote anything, and should be ignored for this figure.
+Figure 3.16: GO enrichment results for the Brown module, looking at BP. There are 142 GO terms at 10% FDR.Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.001, and <0.0001.  The fractions to the left do not denote anything, and should be ignored for this figure.
 
 **MF**
-```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 input="brownbrown_kME.csv"
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab"
 goDatabase="go.obo"
@@ -540,7 +560,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            smallest=5,
            clusterCutHeight=0.25,
            Module=TRUE,Alternative="g"
-) #41 GO terms at 10% FDR
+) #21 GO terms at 10% FDR
 
 results=gomwuPlot(input,goAnnotations,goDivision,
                   absValue=0.001,
@@ -552,10 +572,11 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.17: GO enrichment results for the Brown module, looking at MF. There are 41 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.001, and <0.001.  The fractions to the left do not denote anything, and should be ignored for this figure.
+Figure 3.17: GO enrichment results for the Brown module, looking at MF. There are 21 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.001, and <0.001.  The fractions to the left do not denote anything, and should be ignored for this figure.
 
 **CC**
-```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 input="brownbrown_kME.csv"
 goAnnotations="B_psygmophilum_isogroup_to_GOterm.tab"
 goDatabase="go.obo"
