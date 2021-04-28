@@ -16,7 +16,7 @@ install.packages('VennDiagram')
 ```
 
 Load the require libraries
-```{r}
+```{r, echo=FALSE}
 library(DESeq2) #Version 1.30.1
 library(affycoretools) #Version 1.62.0
 library(arrayQualityMetrics) #Version 3.46.0
@@ -99,9 +99,7 @@ totalCounts=colSums(countData)
 totalCounts
 barplot(totalCounts, col=c("green", "green", "green", "green", "green", "green", "green", "green", "blue", "blue", "blue", "blue", "red", "red", "red", "red", "red", "red", "red", "red"), ylab="raw counts", main="Total counts of each sample")
 ```
-Figure 1. Total raw counts in each sample. The y-axis shows the total raw number of counts with the x-axis denoting the samples. Each sample group with a different experimental temperature are denoted by colors, where greem is the control, blue is cool, and red is heat. Control_1.1 has the highest raw counts of *B. psygmophilum* out of all 20 sample groups (n=1285858), and Cool_1 has the lowest raw count (n=484972).
-
-Notes: Make the x-axis more clear, which bar belongs to which sample? Green = control, blue = cool etc. Make x-axis vertical?
+Figure 1. Total raw counts in each sample. The y-axis shows the total raw number of counts with the x-axis denoting the samples. Each sample group with a different experimental temperature are denoted by colors, where green is the control, blue is cool, and red is heat. Control_1.1 has the highest raw counts of *B. psygmophilum* out of all 20 sample groups (n=1285858), and Cool_1 has the lowest raw count (n=484972).
 
 ```{r}
 min(totalCounts) #484972
@@ -132,6 +130,8 @@ Plotting the dispersions, which is done by fitting our data into the curve. Idea
 ```{r}
 plotDispEsts(dds, main="Dispersion plot Symbiont Stress")
 ```
+Figure2. Dispersion plot estimates over the average expression strength in 20 sample groups of *Breviolum psygmophiulm*. Gene-wise maximum likelihood estimates (MLS) are done using the gene’s data (black dots). The red line indicates a curve fit to the MLEs capture the overall trend of dispersion-mean dependence. Black points circled in blue are dispersion outliers. Overall, a “hockey stick” curve (red) indicates are data is in good shape for DESeq analysis. X-axis indicates the mean of normazlied counts, and y-axis indicates dispersion.
+
 ## Pairwise comparision of Cool vs. Control
 Here we are starting to look for differentially expressed genes
 ```{r}
@@ -161,9 +161,9 @@ nrow(rescool[rescool$padj<0.1 & rescool$log2FoldChange < 0 & !is.na(rescool$padj
 Let's make a MA plot and save the result as dataframe. 
 ```{r}
 plotMA(rescool, main="Cool vs Control")
-plotMA(rescool, main="Cool vs Control", ylim=c(-5,5))
 ```
-MA plot. *INSERT FIGURE CAPTION*
+Figure3. MA plot for differential gene expression in 4 cool samples of  *Breviolum psygmophiulm* compared with the control. Blue dots above x-axis indicate genes that are over-expressed (n=3963) where blue dots below the x-axis are genes that are under-expressed (n=3200). X-axis is the mean of normalized counts, and the y-axis is the log fold change. 
+
 ```{r}
 results <- as.data.frame(rescool)
 head(results) #note taht we're getting double isogroup in the names here
@@ -221,9 +221,8 @@ nrow(resheat[resheat$padj<0.1 & resheat$log2FoldChange < 0 & !is.na(resheat$padj
 Let's make a MA plot and save the result as dataframe. 
 ```{r}
 plotMA(resheat, main="Heat vs Control")
-plotMA(resheat, main="Heat vs Control", ylim=c(-5,5))
 ```
-MA plot. *INSERT FIGURE CAPTION*
+Figure4. MA plot for differential gene expression in 8 heat samples of  *Breviolum psygmophiulm* compared with the control. Blue dots above x-axis indicate genes that are over-expressed (n=2852) where blue dots below the x-axis are genes that are under-expressed (n=2563). X-axis is the mean of normalized counts, and the y-axis is the log fold change.
 ```{r}
 results2 <- as.data.frame(resheat)
 head(results2)
@@ -269,7 +268,7 @@ length(valheat[,1])
 table(complete.cases(valheat))
 ```
 Normalizing the data, which is important for heatmap and PCA.
-```{r}
+```{r, echo=FALSE}
 rlog=rlogTransformation(dds, blind=TRUE) 
 rld=assay(rlog)
 head(rld)
@@ -278,7 +277,7 @@ head(rld)
 length(rld[,1])
 ```
 Bind together p-values and rlog data, and write as .csv
-```{r}
+```{r, echo=FALSE}
 rldpvals=cbind(rld,valcool, valheat)
 head(rldpvals)
 dim(rldpvals)
@@ -310,8 +309,10 @@ rownames(sampleDistMatrix)=paste(treat)
 heat.colors = colorRampPalette(rev(c("blue","yellow","red")),bias=0.3)(100)
 pheatmap(sampleDistMatrix,color = heat.colors,cex=0.9,border_color=NA,cluster_rows=T,cluster_cols=T, main="Gene Expression Difference Between Cool, Control, and Heat")
 ```
+Figure5. Heatmap showing gene expression difference between the 4 cool samples, 8 control samples, and the 8 heat samples of *Breviolum psygmophiulm*. The warmer color, red and orange, indicate that the two sample groups are more similar. The 8 heat groups and the 8 control groups appeared to be more similar than they are with the 4 cold groups. X-axis and y-axis show the 12 treatment groups and the 8 control groups.
+
 ## VENN Diagram
-The Venn diagram includes both up and down regulated genes in common for PC02. First we create a series of genes that are up and down-regulated from each of our earlier pairwise comparisons.
+The Venn diagram includes both up and down regulated genes in common. First we create a series of genes that are up and down-regulated from each of our earlier pairwise comparisons.
 ```{r}
 cool_up=row.names(rescool[rescool$padj<0.1 & !is.na(rescool$padj) & rescool$log2FoldChange>0,])
 length(cool_up) 
@@ -346,10 +347,11 @@ The total number of genes that are up or down regulated.
 pdegs1=union(cool,heat)
 length(pdegs1)
 ```
-Now we're ready to create a Venn diagram.
+Now we're ready to create a Venn diagram for the up-regulated genes. 
 ```{r}
 candidates=list("Cool"=cool_up, "Heat"=heat_up)
 
+title <- "Venn diagram of up-regulated genes"
 prettyvenn=venn.diagram(
   x = candidates,
   filename=NULL,
@@ -365,11 +367,40 @@ prettyvenn=venn.diagram(
   cat.cex = 2.5,
   cat.fontfamily = "sans",
   cat.dist = c(0.08, 0.08),
-  cat.pos = 1
+  cat.pos = 1, 
+  title
 );
 grid.newpage()
 grid.draw(prettyvenn)
 ```
+Figure6. Venn diagram showing 652 common genes that are up-regulated in both 4 cool and 8 heat samples of *Breviolum psygmophiulm*. There is a total of 3963 up-regulated genes in the cool samples, and a total of 2852 up-regulated genes in the heat samples. 
+
+Repeat the same steps to make a Venn diagram for the down-regulated genes. 
+```{r}
+candidates=list("Cool"=cool_down, "Heat"=heat_down)
+
+title <- "Venn diagram of down-regulated genes"
+prettyvenn=venn.diagram(
+  x = candidates,
+  filename=NULL,
+  col = "transparent",
+  fill = c("coral2", "forestgreen"),
+  alpha = 0.5,
+  # label.col = c("darkred", "white", "darkgreen", "white", "white", "white", "blue4"),
+  cex = 2.5,
+  fontfamily = "sans",
+  fontface = "bold",
+  cat.default.pos = "text",
+  cat.col = c("darkred", "darkgreen"),
+  cat.cex = 2.5,
+  cat.fontfamily = "sans",
+  cat.dist = c(0.08, 0.08),
+  cat.pos = 1, title
+);
+grid.newpage()
+grid.draw(prettyvenn)
+```
+Figure7. Venn diagram showing 703 common genes that are down-regulated in both 4 cool and 8 heat samples of *Breviolum psygmophiulm*. There is a total of 3200 up-regulated genes in the cool samples, and a total of 2563 up-regulated genes in the heat samples. 
 
 ## Heatmap for Gene EXpression
 First, let's read in the Rld and P-values again.
@@ -398,6 +429,8 @@ col0=colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(1
 
 pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F, main = "Gene Expression of Heat Treatment")
 ```
+Figure8. *Breviolum psygmophiulm* gene expression difference in cool, heat, and control group in comparision with the top 100 differentially expressed gene from heat treatment group. Rows are genes and columns are sampels. Blue indicates genes that are down-regulated, and orange indicates genes that are up-regulated. The differentially expressed genes in the 8 heat groups have opposite expression from the 4 cool groups, and the 8 control groups.
+
 Create a heatmap for the top 100 deferentially expressed genes in the cool treatment.
 ```{r}
 topnum= 100
@@ -417,7 +450,9 @@ col0=colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(1
 
 pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F, main = "Gene Expression of Cool Treatment")
 ```
-Lastly, create a heatmap for genes that are common in both treatmennts.
+Figure9. *Breviolum psygmophiulm* gene expression difference in cool, heat, and control group in comparision with the top 100 differentially expressed gene from heat treatment group. Rows are genes and columns are sampels. Blue indicates genes that are down-regulated, and orange indicates genes that are up-regulated. The differentially expressed in the 4 cool sample groups have opposite expression from the 8 control and the 8 heat groups.
+
+Lastly, create a heatmap for genes that are common in both treatments.
 ```{r}
 rldpvals <- read.csv(file="Bpsy2021_RLDandPVALS.csv", row.names=1)
 
@@ -435,4 +470,7 @@ col0=colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(1
 
 pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F, main = "Gene Expression in Common Genes")
 ```
+Figure10. *Breviolum psygmophiulm* gene expression difference in cool, heat, and control group in comparision with genes that are common in both cold and heat treatments. Rows are genes and columns are sampels. Blue indicates genes that are down-regulated, and orange indicates genes that are up-regulated. Between the 4 cool samples and the 8 heat samples, there seem to have half of the genes that have opposite expression, and the other half of the genes with similar expression pattern. For the groups of genes that have opposite expression between the cold and heat samples, the control groups genes are netiehr up nor down-regulated. For the groups of genes that have similar expression pattern in both heat and cold treatment groups, the control group genes have opposite gene expression pattern than the treatment groups.
 
+## Conclusion
+Using the DESeq analysis, we found 3963 genes that are over-expressed, and 3200 genes that are under-expressed in the 4 cool samples of *Breviolum psygmophiulm*. In the 8 heat treated samples, we found 2852 genes that are over-expressed, and 2563 that are under-expressed. Among the up-regulated genes in both cool and heat treated groups, there are 652 common genes. Among the down-regulated genes in both cool and heat treatment groups, there are 703 common genes. Heatmaps of gene expression show that there are groups of genes with opposite expressions, and groups of genes with similar expression between the heat and cool groups. 
