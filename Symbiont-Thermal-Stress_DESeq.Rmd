@@ -1,9 +1,32 @@
 ---
 title: "Symbiont-Thermal-Stress"
-author: "Elsa Brenner, Nick Peoples, Erica Sun"
-date: "4/6/2021"
+author: "Elsa Brenner, Alexa Huazer, Erica Sun"
+date: "4/29/2021"
 output: html_document
 ---
+## Introduction
+A recent study found that when algal symbiont cells (*Breviolum psygmophilum)* are in a coral host (*Oculina arbuscula*), they display a muted response to thermal stress compared to the host itself. This lead to several outstanding questions including whether corals are somehow protecting, or buffering their symbiont cells from stressful temperatures, or perhaps the symbiont cells were non-responsive to the temperatures tested. To answer these questions, *Breviolum psygmophilum* cells were isolated from the same population of coral host and exposed to the same pattern of thermal stress as the corals. Exposing the symbiont cells to the same thermal stress as the corals, but out of symbiosis, will help clarify what role coral hosts plays in the symbiont transcriptomic response to temperature stress. We are comparing differentially gene expression between cold and heat stress to determine what stress causing a stronger response. Additionally, we will compare what GO categories are up- or down-regulated in response to each stress to determine what pathways are activated or repressed. These results can then be compared to the results of the previous study to better understand if the corals are protecting their symbiont cells.
+
+**R version**
+```{r, eval=FALSE}
+library(DESeq2) #Version 1.30.1
+library(affycoretools) #Version 1.62.0
+library(arrayQualityMetrics) #Version 3.46.0
+library(genefilter) #Version 1.72.1
+library(Biobase) #Version 2.50.0
+library(ggplot2) #Version 3.3.3
+library(dplyr) #Version 1.0.5
+library(tidyverse) #Version 1.3.0
+library(pheatmap) #Version 1.0.12
+library(vegan) #Version 2.5.7
+library(ggrepel) #Version 0.9.1
+library(RColorBrewer) #Version 1.1.2
+library(gplots) #Version 3.1.1
+library(VennDiagram) #Version 1.6.20
+```
+
+
+
 ## Getting started
 Set your working directory
 ```{r}
@@ -16,7 +39,7 @@ install.packages('VennDiagram')
 ```
 
 Load the require libraries
-```{r, echo=FALSE}
+```{r, results='hide'}
 library(DESeq2) #Version 1.30.1
 library(affycoretools) #Version 1.62.0
 library(arrayQualityMetrics) #Version 3.46.0
@@ -69,7 +92,7 @@ dds=DESeqDataSetFromMatrix(countData=countData,
                            design = ~treat)
 ```
 Then we can normalize our data using vsd
-```{r}
+```{r, warning=FALSE, message=FALSE}
 vsd.ge=assay(vst(dds))
 rl=vst(dds)
 e=ExpressionSet(assay(rl), AnnotatedDataFrame(as.data.frame(colData(rl))))
@@ -83,7 +106,7 @@ Here marks the end of detecting outliers! Remember, you only have to run the cod
 
 ## Identifying differentially expressed genes using DESeq
 Read in counts again, since we won't be repeating the outlier part. 
-```{r}
+```{r, results='hide'}
 ountData <- read.table("B_psygmophilum_counts.txt")
 head(countData)
 length(countData[,1])
@@ -179,7 +202,7 @@ head(cd)
 
 ### Making a GO Table for the Cool treatment for MWU
 Taking each isogroup and making ranked p-values with directionality 
-```{r}
+```{r, results='hide'}
 cd
 go_input_Cool = cd %>%
   tibble::rownames_to_column(var = "iso") %>%
@@ -268,7 +291,7 @@ length(valheat[,1])
 table(complete.cases(valheat))
 ```
 Normalizing the data, which is important for heatmap and PCA.
-```{r, echo=FALSE}
+```{r, results='hide'}
 rlog=rlogTransformation(dds, blind=TRUE) 
 rld=assay(rlog)
 head(rld)
@@ -277,7 +300,7 @@ head(rld)
 length(rld[,1])
 ```
 Bind together p-values and rlog data, and write as .csv
-```{r, echo=FALSE}
+```{r, results='hide'}
 rldpvals=cbind(rld,valcool, valheat)
 head(rldpvals)
 dim(rldpvals)
