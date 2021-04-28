@@ -7,9 +7,7 @@ output: html_document
 
 # Introduction
 
-A recent study found that when algal symbiont cells (*Breviolum psygmophilum*) are in a coral host (*Oculina arbuscula*), they display a muted response to thermal stress compared to the host itself. This lead to several outstanding questions including whether corals are somehow protecting, or buffering their symbiont cells from stressful temperatures, or perhaps the symbiont cells were non-responsive to the temperatures tested. To answer these questions, *Breviolum psygmophilum* cells were isolated from the same population of coral host and exposed to the same pattern of thermal stress as the corals. Exposing the symbiont cells to the same thermal stress as the corals, but out of symbiosis, will help clarify what role coral hosts plays in the symbiont transcriptomic response to temperature stress. We are comparing differentially gene expression between cold and heat stress to determine what stress causing a stronger response. Additionally, we will compare what GO categories are up- or down-regulated in response to each stress to determine what pathways are activated or repressed. These results can then be compared to the results of the previous study to better understand if the corals are protecting their symbiont cells. 
-
-WCGNA analysis incorporates trait data to determine what gene groupings are correlated with different traits. For our data, this allows us to confirm that differential gene expression is due to the different treatments and not due to differences in cell density or growth rate.
+Introduction to study can be found in the Deseq file. WCGNA analysis incorporates trait data to determine what gene groupings are correlated with different traits. For our data, this allows us to check that differential gene expression is due to the different treatments and not due to differences in cell density or growth rate.
 
 **R version** 
 
@@ -78,7 +76,7 @@ write.csv( rldFiltered,file="Bpsy_wgcna_allgenes.csv",quote=F,row.names=T)
 #### Data input and cleaning
 
 We read in the data file created above and rename the rows based on the isogroup names.
-```{r}
+```{r, message=FALSE, warning=FALSE}
 options(stringsAsFactors=FALSE)
 allowWGCNAThreads()
 
@@ -185,7 +183,7 @@ Figure 2.3 Gene clustering based on TOM dissimilarity. Based on the TOM calculat
 **Now that we have dendrogram and TOM dissimilarity, we can use these to define modules**
 
 We choose only large modules. We use a hybrid method of dynamic tree cutting that uses both the dendrogram and TOM dissimilairty as inputs to cut and merge modules.
-```{r}
+```{r, warning=FALSE, message=FALSE}
 minModuleSize=90
 dynamicMods= cutreeDynamic(dendro= geneTree, distM= dissTOM, deepSplit=2, pamRespectsDendro= FALSE, minClusterSize= minModuleSize)
 table(dynamicMods)
@@ -198,6 +196,7 @@ plotDendroAndColors(geneTree, dynamicColors, "Dynamic Tree Cut", dendroLabels= F
 ```
 
 Figure 2.4 Dendrogram graphed with moduled membership. After dynamic tree cutting, the gene dendrogram is graphed with the module membership graphed underneath. 
+
 
 
 We currently have a lot of modules that are likely closely related. Therefore, we want to merge together these modules of similar gene expression profiles to get the best correlations with the different traits. To do this we calculated eigengenes and then calculated the similarity between them. Modules are merged based on a cut value of 0.4 and the new larger modules are saved for additional analysis. 
@@ -220,7 +219,7 @@ abline(h=MEDissThres, col="red")
 
 Figure 2.5 Dendrogram of modules with cut off point. Modules below the cut off value were merged together. These modules were closely related enough to be analyzed together as one.
 
-```{r}
+```{r, results='hide', warning=FALSE, error=FALSE, message=FALSE}
 merge= mergeCloseModules(datExpr0, dynamicColors, cutHeight= MEDissThres, verbose =3)
 
 mergedColors= merge$colors
@@ -260,7 +259,7 @@ nGenes = ncol(datExpr0)
 nSamples = nrow(datExpr0)
 table(moduleColors)
 ```
-After merging we have five modules with the size of each listed underneath.
+After merging, we have five modules with the size of each listed underneath.
 
 Now we recalculate MEs with color labels and plot a heatmap of the module correlations with the different traits. 
 ```{r}
@@ -331,7 +330,6 @@ vs=t(datExpr0)
 cands=names(datExpr0[moduleColors=="turquoise"]) 
 c.vsd=vs[rownames(vs) %in% cands,]
 nrow(c.vsd) 
-table(moduleColors)
 write.csv(c.vsd,"rlog_MMturquoise.csv",quote=F)
 ```
 
@@ -444,7 +442,6 @@ vs=t(datExpr0)
 cands=names(datExpr0[moduleColors=="greenyellow"]) 
 c.vsd=vs[rownames(vs) %in% cands,]
 nrow(c.vsd) 
-table(moduleColors)
 write.csv(c.vsd,"rlog_MMgreenyellow.csv",quote=F)
 ```
 
@@ -558,7 +555,6 @@ vs=t(datExpr0)
 cands=names(datExpr0[moduleColors=="brown"]) 
 c.vsd=vs[rownames(vs) %in% cands,]
 nrow(c.vsd) 
-table(moduleColors)
 write.csv(c.vsd,"rlog_MMbrown.csv",quote=F)
 ```
 
@@ -672,7 +668,6 @@ vs=t(datExpr0)
 cands=names(datExpr0[moduleColors=="magenta"]) 
 c.vsd=vs[rownames(vs) %in% cands,]
 nrow(c.vsd) 
-table(moduleColors)
 write.csv(c.vsd,"rlog_MMmagenta.csv",quote=F)
 ```
 

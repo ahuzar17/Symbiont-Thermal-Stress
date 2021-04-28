@@ -37,9 +37,10 @@ Let's start with BP for the cool treatment:
 
 You may need to install the package "ape"
 
-```{r, echo=FALSE}
-library("ape")
+```{r}
+library("ape") #Version 5.4.1
 ```
+
 
 Next, let's load the correct files:
 
@@ -130,7 +131,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.2: GO enrichment results for the cool treatment, looking at Cellular Componants. There are 32 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  Blue represents downregulation, and red represents upregulation.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
+Figure 3.2: GO enrichment results for the cool treatment, looking at Cellular Components. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  Blue represents downregulation, and red represents upregulation.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 **BP for the cool treatment**
 
@@ -160,7 +161,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.3: GO enrichment results for the cool treatment, looking at Molecular Functions. There are 44 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  Blue represents downregulation, and red represents upregulation.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
+Figure 3.3: GO enrichment results for the cool treatment, looking at Molecular Functions. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  Blue represents downregulation, and red represents upregulation.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 ### We've finished all GO Divisions for the Cool Treatment, now let's move on to the Heat treatment.  
 
@@ -192,7 +193,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.4: GO enrichment results for the heat treatment, looking at Biological Processes. There are 26 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  Blue represents downregulation, and red represents upregulation.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
+Figure 3.4: GO enrichment results for the heat treatment, looking at Biological Processes. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  Blue represents downregulation, and red represents upregulation.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 **CC**
 
@@ -223,7 +224,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.5: GO enrichment results for the heat treatment, looking at Cellular Componants. There are 25 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  Blue represents downregulation, and red represents upregulation.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
+Figure 3.5: GO enrichment results for the heat treatment, looking at Cellular Componants. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  Blue represents downregulation, and red represents upregulation.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 **MF**
 
@@ -253,7 +254,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.6: GO enrichment results for the heat treatment, looking at Molecular Functions. There are 6 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  Blue represents downregulation, and red represents upregulation.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
+Figure 3.6: GO enrichment results for the heat treatment, looking at Molecular Functions. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  Blue represents downregulation, and red represents upregulation.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 ## Now we've finished all of our original GO divisions and experimental treatments!  But we're not done with GO...
 
@@ -293,7 +294,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.7: GO enrichment results for the Turquoise module, looking at Biological Processes. There are 3 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
+Figure 3.7: GO enrichment results for the Turquoise module, looking at Biological Processes. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 #### Now just like before, we're going to have to run each module from WGCNA through all three GO divisions.  
 
@@ -324,7 +325,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.9: GO enrichment results for the Turquoise module, looking at Cellular Componants. There are 9 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
+Figure 3.9: GO enrichment results for the Turquoise module, looking at Cellular Components. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 
 There were no GO terms at 10% FDR for turquoise MF.
@@ -361,7 +362,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.10: GO enrichment results for the GreenYellow module, looking at BP. There are 10 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
+Figure 3.10: GO enrichment results for the GreenYellow module, looking at BP. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 **MF**
 
@@ -390,7 +391,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.11: GO enrichment results for the GreenYellow module, looking at MF. There are 5 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
+Figure 3.11: GO enrichment results for the GreenYellow module, looking at MF. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 **CC**
 
@@ -419,7 +420,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.12: GO enrichment results for the GreenYellow module, looking at CC. There are 12 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
+Figure 3.12: GO enrichment results for the GreenYellow module, looking at CC. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 ### Magenta:
 Negatively correlated with cool treatment.
@@ -451,7 +452,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.13: GO enrichment results for the Magenta module, looking at BP. There are 11 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
+Figure 3.13: GO enrichment results for the Magenta module, looking at BP. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 **MF**
 
@@ -480,7 +481,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.14: GO enrichment results for the Magenta module, looking at MF. There are 7 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
+Figure 3.14: GO enrichment results for the Magenta module, looking at MF. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 **CC**
 
@@ -509,7 +510,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.15: GO enrichment results for the Magenta module, looking at CC. There are 6 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
+Figure 3.15: GO enrichment results for the Magenta module, looking at CC. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left of each GO term display the number of enriched terms in the numerator, over the total number of go terms in that unit in the denominator.
 
 ### Brown: 
 Positively correlated with heat treatment and cell density
@@ -531,7 +532,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            smallest=5,
            clusterCutHeight=0.25,
            Module=TRUE,Alternative="g"
-) #142 GO terms at 10% FDR
+) 
 
 results=gomwuPlot(input,goAnnotations,goDivision,
                   absValue=0.001,
@@ -543,7 +544,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.16: GO enrichment results for the Brown module, looking at BP. There are 142 GO terms at 10% FDR.Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.001, and <0.0001.  The fractions to the left do not denote anything, and should be ignored for this figure.
+Figure 3.16: GO enrichment results for the Brown module, looking at BP. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.001, and <0.0001.  The fractions to the left do not denote anything, and should be ignored for this figure.
 
 **MF**
 
@@ -572,7 +573,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.17: GO enrichment results for the Brown module, looking at MF. There are 21 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.001, and <0.001.  The fractions to the left do not denote anything, and should be ignored for this figure.
+Figure 3.17: GO enrichment results for the Brown module, looking at MF. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.001, and <0.001.  The fractions to the left do not denote anything, and should be ignored for this figure.
 
 **CC**
 
@@ -601,7 +602,7 @@ results=gomwuPlot(input,goAnnotations,goDivision,
 )
 ```
 
-Figure 3.18: GO enrichment results for the Brown module, looking at CC. There are 24 GO terms at 10% FDR. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left do not denote anything, and should be ignored for this figure.
+Figure 3.18: GO enrichment results for the Brown module, looking at CC. Text thickness on the tree signifies goodness of fit, using the p-values <0.01, <0.05, and <0.1.  The fractions to the left do not denote anything, and should be ignored for this figure.
 
 
 # Conclusion
