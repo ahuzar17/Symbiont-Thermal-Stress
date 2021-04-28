@@ -752,7 +752,6 @@ write.csv(modkME,file=paste(whichModule,"magenta_kME.csv",sep=""),quote=F)
 
 Analyzing gene expression in terms of different traits grouped our samples mainly based on treatment rather than the other trait variables.Merging our gene expression data in terms of similar patterns of expression lead us to have 5 modules. Of those 5, 4 were well correlated with different trait aspects of the experiment. The cyan module showed no strong correlation with any trait so it was not included in subsequent further analysis. The strongest correlations between modules and traits were found with the treatment variables. Although, there were also some strong correlations with average cell counts and average cells per mL. These correlations followed the same direction and similar strength as the heat treatment which is due to higher cell counts being correlated with exposure to higher temperatures. In particular, the brown module cannot be distinguished whether it is a function of high heat or high cell counts as the correlations are too similar. GO enrichment of this module may shed light on this distinction based on the terms in the module.  
 
- Heat_1.1 is weird
 
 
 
