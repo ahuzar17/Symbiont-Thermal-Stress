@@ -1,9 +1,38 @@
 ---
 title: "Symbiont-Thermal-Stress"
-author: "Elsa Brenner, Nick Peoples, Erica Sun"
-date: "4/6/2021"
-output: html_document
+author: "Elsa Brenner, Alexa Huazer, Erica Sun"
+date: "4/29/2021"
+output: 
+  html_document:
+    toc: TRUE
+    toc_depth: 3
+    toc_float: TRUE
+    theme: lumen
 ---
+## Introduction
+A recent study found that when algal symbiont cells (*Breviolum psygmophilum)* are in a coral host (*Oculina arbuscula*), they display a muted response to thermal stress compared to the host itself. This lead to several outstanding questions including whether corals are somehow protecting, or buffering their symbiont cells from stressful temperatures, or perhaps the symbiont cells were non-responsive to the temperatures tested. To answer these questions, *Breviolum psygmophilum* cells were isolated from the same population of coral host and exposed to the same pattern of thermal stress as the corals. Exposing the symbiont cells to the same thermal stress as the corals, but out of symbiosis, will help clarify what role coral hosts plays in the symbiont transcriptomic response to temperature stress. We are comparing differentially gene expression between cold and heat stress to determine what stress causing a stronger response. Additionally, we will compare what GO categories are up- or down-regulated in response to each stress to determine what pathways are activated or repressed. These results can then be compared to the results of the previous study to better understand if the corals are protecting their symbiont cells.
+
+**Version Control**
+```{r, eval=FALSE}
+R.version #4.0.4
+library(DESeq2) #Version 1.30.1
+library(affycoretools) #Version 1.62.0
+library(arrayQualityMetrics) #Version 3.46.0
+library(genefilter) #Version 1.72.1
+library(Biobase) #Version 2.50.0
+library(ggplot2) #Version 3.3.3
+library(dplyr) #Version 1.0.5
+library(tidyverse) #Version 1.3.0
+library(pheatmap) #Version 1.0.12
+library(vegan) #Version 2.5.7
+library(ggrepel) #Version 0.9.1
+library(RColorBrewer) #Version 1.1.2
+library(gplots) #Version 3.1.1
+library(VennDiagram) #Version 1.6.20
+```
+
+
+
 ## Getting started
 Set your working directory
 ```{r}
@@ -16,7 +45,7 @@ install.packages('VennDiagram')
 ```
 
 Load the require libraries
-```{r, echo=FALSE}
+```{r, results='hide', message=FALSE}
 library(DESeq2) #Version 1.30.1
 library(affycoretools) #Version 1.62.0
 library(arrayQualityMetrics) #Version 3.46.0
@@ -35,14 +64,14 @@ library(VennDiagram) #Version 1.6.20
 Read in counts and assign it to countData
 ```{r}
 countData <- read.table("B_psygmophilum_counts.txt")
-head(countData)
+#head(countData)
 length(countData[,1])
 ```
 Here, we have 8 controls, 4 cool, and 8 heat samples. This is due to the cool samples having a lower cell count. 
 ```{r}
 names(countData)=c( "Control_1.1", "Control_1", "Control_2.1", "Control_2", "Control_3.1", "Control_3", "Control_4.1", "Control_4", "Cool_1", "Cool_2", "Cool_3", "Cool_4","Heat_1.1", "Heat_1", "Heat_2.1", "Heat_2", "Heat_3.1", "Heat_3", "Heat_4.1", "Heat_4")
 row.names(countData)=sub("", "isogroup", rownames(countData))
-head(countData)
+#head(countData)
 ```
 Make sure you can succesfully read in the iso2gene tab separated file
 ```{r}
@@ -58,9 +87,8 @@ setwd("/Users/ericasun/Documents/GitHub/Symbiont-Thermal-Stress/Outliers/")
 v=setwd("/Users/ericasun/Documents/GitHub/Symbiont-Thermal-Stress/Outliers/")
 treat=c( "Control_1.1", "Control_1", "Control_2.1", "Control_2", "Control_3.1", "Control_3", "Control_4.1", "Control_4", "Cool_1", "Cool_2", "Cool_3", "Cool_4","Heat_1.1", "Heat_1", "Heat_2.1", "Heat_2", "Heat_3.1", "Heat_3", "Heat_4.1", "Heat_4")
 g=data.frame(treat)
-g
 colData= g
-head(colData)
+#head(colData)
 ```
 Here, we are using DESeq to create a model for us to see how our design is varied by treatment
 ```{r}
@@ -69,7 +97,7 @@ dds=DESeqDataSetFromMatrix(countData=countData,
                            design = ~treat)
 ```
 Then we can normalize our data using vsd
-```{r}
+```{r, warning=FALSE, message=FALSE}
 vsd.ge=assay(vst(dds))
 rl=vst(dds)
 e=ExpressionSet(assay(rl), AnnotatedDataFrame(as.data.frame(colData(rl))))
@@ -83,23 +111,24 @@ Here marks the end of detecting outliers! Remember, you only have to run the cod
 
 ## Identifying differentially expressed genes using DESeq
 Read in counts again, since we won't be repeating the outlier part. 
-```{r}
+```{r, results='hide'}
 ountData <- read.table("B_psygmophilum_counts.txt")
-head(countData)
+#head(countData)
 length(countData[,1])
 #28265
 
 names(countData)=c( "Control_1.1", "Control_1", "Control_2.1", "Control_2", "Control_3.1", "Control_3", "Control_4.1", "Control_4", "Cool_1", "Cool_2", "Cool_3", "Cool_4","Heat_1.1", "Heat_1", "Heat_2.1", "Heat_2", "Heat_3.1", "Heat_3", "Heat_4.1", "Heat_4")
 row.names(countData)=sub("", "isogroup", rownames(countData))
-head(countData)
+#head(countData)
 ```
 Let's generate a table and visualize the total counts.
 ```{r}
 totalCounts=colSums(countData)
 totalCounts
-barplot(totalCounts, col=c("green", "green", "green", "green", "green", "green", "green", "green", "blue", "blue", "blue", "blue", "red", "red", "red", "red", "red", "red", "red", "red"), ylab="raw counts", main="Total counts of each sample")
+barplot(totalCounts, col=c("green", "green", "green", "green", "green", "green", "green", "green", "blue", "blue", "blue", "blue", "red", "red", "red", "red", "red", "red", "red", "red"), ylab="raw counts", main="Total counts of each sample", las=2)
 ```
-Figure 1. Total raw counts in each sample. The y-axis shows the total raw number of counts with the x-axis denoting the samples. Each sample group with a different experimental temperature are denoted by colors, where green is the control, blue is cool, and red is heat. Control_1.1 has the highest raw counts of *B. psygmophilum* out of all 20 sample groups (n=1285858), and Cool_1 has the lowest raw count (n=484972).
+
+**Figure1.** Total raw counts in each sample. The y-axis shows the total raw number of counts with the x-axis denoting the samples. Each sample group with a different experimental temperature are denoted by colors, where green is the control, blue is cool, and red is heat. Control_1.1 has the highest raw counts of *B. psygmophilum* out of all 20 sample groups (n=1285858), and Cool_1 has the lowest raw count (n=484972).
 
 ```{r}
 min(totalCounts) #484972
@@ -111,7 +140,6 @@ Create conditions table and deseq object. This is the same one as what we used f
 ```{r}
 treat=c( "Control", "Control", "Control", "Control", "Control", "Control", "Control", "Control", "Cool", "Cool", "Cool", "Cool","Heat", "Heat", "Heat", "Heat", "Heat", "Heat", "Heat", "Heat")
 g=data.frame(treat)
-g
 colData<- g
 dds<-DESeqDataSetFromMatrix(countData=countData, colData=colData, design=~treat) #can only test for the main effects of site, pco2, temp
 ```
@@ -130,7 +158,8 @@ Plotting the dispersions, which is done by fitting our data into the curve. Idea
 ```{r}
 plotDispEsts(dds, main="Dispersion plot Symbiont Stress")
 ```
-Figure2. Dispersion plot estimates over the average expression strength in 20 sample groups of *Breviolum psygmophiulm*. Gene-wise maximum likelihood estimates (MLS) are done using the gene’s data (black dots). The red line indicates a curve fit to the MLEs capture the overall trend of dispersion-mean dependence. Black points circled in blue are dispersion outliers. Overall, a “hockey stick” curve (red) indicates are data is in good shape for DESeq analysis. X-axis indicates the mean of normazlied counts, and y-axis indicates dispersion.
+
+**Figure2.** Dispersion plot estimates over the average expression strength in 20 sample groups of *Breviolum psygmophiulm*. Gene-wise maximum likelihood estimates (MLS) are done using the gene’s data (black dots). The red line indicates a curve fit to the MLEs capture the overall trend of dispersion-mean dependence. Black points circled in blue are dispersion outliers. Overall, a “hockey stick” curve (red) indicates are data is in good shape for DESeq analysis. X-axis indicates the mean of normazlied counts, and y-axis indicates dispersion.
 
 ## Pairwise comparision of Cool vs. Control
 Here we are starting to look for differentially expressed genes
@@ -162,11 +191,12 @@ Let's make a MA plot and save the result as dataframe.
 ```{r}
 plotMA(rescool, main="Cool vs Control")
 ```
-Figure3. MA plot for differential gene expression in 4 cool samples of  *Breviolum psygmophiulm* compared with the control. Blue dots above x-axis indicate genes that are over-expressed (n=3963) where blue dots below the x-axis are genes that are under-expressed (n=3200). X-axis is the mean of normalized counts, and the y-axis is the log fold change. 
+
+**Figure3.** MA plot for differential gene expression in 4 cool samples of  *Breviolum psygmophiulm* compared with the control. Blue dots above x-axis indicate genes that are over-expressed (n=3963) where blue dots below the x-axis are genes that are under-expressed (n=3200). X-axis is the mean of normalized counts, and the y-axis is the log fold change. 
 
 ```{r}
 results <- as.data.frame(rescool)
-head(results) #note taht we're getting double isogroup in the names here
+#head(results) #note taht we're getting double isogroup in the names here
 ```
 Write a table of the results, and save to your directory as a .csv file.
 ```{r}
@@ -174,12 +204,12 @@ Write a table of the results, and save to your directory as a .csv file.
 write.table(rescool, file="Cool_2021.txt", quote=F, sep="\t")
 #read the table back in for GO analysis!
 cd <- read.table("Cool_2021.txt")
-head(cd)
+#head(cd)
 ```
 
 ### Making a GO Table for the Cool treatment for MWU
 Taking each isogroup and making ranked p-values with directionality 
-```{r}
+```{r, results='hide'}
 cd
 go_input_Cool = cd %>%
   tibble::rownames_to_column(var = "iso") %>%
@@ -187,9 +217,9 @@ go_input_Cool = cd %>%
   mutate(mutated_p_updown = ifelse(log2FoldChange < 0, mutated_p*-1, mutated_p*1)) %>%
   na.omit() %>%
   select(iso, mutated_p_updown)
-head(go_input_Cool)
+#head(go_input_Cool)
 colnames(go_input_Cool) <- c("gene", "pval")
-head(go_input_Cool)
+#head(go_input_Cool)
 write.csv(go_input_Cool, file="Cool_GO.csv", quote=F, row.names=FALSE)
 ```
 ## Pairwise comparision of Heat vs. Control
@@ -222,10 +252,11 @@ Let's make a MA plot and save the result as dataframe.
 ```{r}
 plotMA(resheat, main="Heat vs Control")
 ```
-Figure4. MA plot for differential gene expression in 8 heat samples of  *Breviolum psygmophiulm* compared with the control. Blue dots above x-axis indicate genes that are over-expressed (n=2852) where blue dots below the x-axis are genes that are under-expressed (n=2563). X-axis is the mean of normalized counts, and the y-axis is the log fold change.
+
+**Figure4.** MA plot for differential gene expression in 8 heat samples of  *Breviolum psygmophiulm* compared with the control. Blue dots above x-axis indicate genes that are over-expressed (n=2852) where blue dots below the x-axis are genes that are under-expressed (n=2563). X-axis is the mean of normalized counts, and the y-axis is the log fold change.
 ```{r}
 results2 <- as.data.frame(resheat)
-head(results2)
+#head(results2)
 #note taht we're getting double isogroup in the names here
 ```
 Write a table of the results, and save to your directory as a .csv file.
@@ -234,7 +265,7 @@ Write a table of the results, and save to your directory as a .csv file.
 write.table(resheat, file="Heat_2021.txt", quote=F, sep="\t")
 #read the table back in for GO analysis!
 cd2 <- read.table("Heat_2021.txt")
-head(cd2)
+#head(cd2)
 ```
 
 ### Making a GO Table for the Heat treatment for MWU
@@ -246,9 +277,9 @@ go_input_Heat = cd2 %>%
   mutate(mutated_p_updown = ifelse(log2FoldChange < 0, mutated_p*-1, mutated_p*1)) %>%
   na.omit() %>%
   select(iso, mutated_p_updown)
-head(go_input_Heat)
+#head(go_input_Heat)
 colnames(go_input_Heat) <- c("gene", "pval")
-head(go_input_Heat)
+#head(go_input_Heat)
 write.csv(go_input_Heat, file="Heat_GO.csv", quote=F, row.names=FALSE)
 ```
 
@@ -256,30 +287,30 @@ write.csv(go_input_Heat, file="Heat_GO.csv", quote=F, row.names=FALSE)
 Getting the p-values and create a table of the rlogdata and p-values.
 ```{r}
 valcool=cbind(rescool$pvalue, rescool$padj)
-head(valcool)
+#head(valcool)
 colnames(valcool)=c("pval.cool", "padj.cool")
 length(valcool[,1])
 table(complete.cases(valcool))
 
 valheat=cbind(resheat$pvalue, resheat$padj)
-head(valheat)
+#head(valheat)
 colnames(valheat)=c("pval.heat", "padj.heat")
 length(valheat[,1])
 table(complete.cases(valheat))
 ```
 Normalizing the data, which is important for heatmap and PCA.
-```{r, echo=FALSE}
+```{r, results='hide'}
 rlog=rlogTransformation(dds, blind=TRUE) 
 rld=assay(rlog)
-head(rld)
+#head(rld)
 colnames(rld)=paste(colData$treat)
-head(rld)
+#head(rld)
 length(rld[,1])
 ```
 Bind together p-values and rlog data, and write as .csv
-```{r, echo=FALSE}
+```{r, results='hide'}
 rldpvals=cbind(rld,valcool, valheat)
-head(rldpvals)
+#head(rldpvals)
 dim(rldpvals)
 # [1] 28265    24
 table(complete.cases(rldpvals))
@@ -288,7 +319,7 @@ table(complete.cases(rldpvals))
 write.csv(rldpvals, "Bpsy2021_RLDandPVALS.csv", quote=F)
 
 colnames(rld)=paste(colData$treat)
-head(rld)
+#head(rld)
 ```
 
 ## Sample distance heatmap
@@ -296,9 +327,9 @@ Let's create the sample distance heatmap which shows how similar each sample is.
 ```{r}
 sampleDists <- as.matrix(dist(t(rld)))
 rldpvals <- read.csv(file="Bpsy2021_RLDandPVALS.csv", row.names=1)
-head(rldpvals)
+#head(rldpvals)
 rld=rldpvals[,1:20]
-head(rld)
+#head(rld)
 
 sampleDists <- dist(t(rld))
 sampleDistMatrix <- as.matrix( sampleDists )
@@ -309,7 +340,8 @@ rownames(sampleDistMatrix)=paste(treat)
 heat.colors = colorRampPalette(rev(c("blue","yellow","red")),bias=0.3)(100)
 pheatmap(sampleDistMatrix,color = heat.colors,cex=0.9,border_color=NA,cluster_rows=T,cluster_cols=T, main="Gene Expression Difference Between Cool, Control, and Heat")
 ```
-Figure5. Heatmap showing gene expression difference between the 4 cool samples, 8 control samples, and the 8 heat samples of *Breviolum psygmophiulm*. The warmer color, red and orange, indicate that the two sample groups are more similar. The 8 heat groups and the 8 control groups appeared to be more similar than they are with the 4 cold groups. X-axis and y-axis show the 12 treatment groups and the 8 control groups.
+
+**Figure5.** Heatmap showing gene expression difference between the 4 cool samples, 8 control samples, and the 8 heat samples of *Breviolum psygmophiulm*. The warmer color, red and orange, indicate that the two sample groups are more similar. The 8 heat groups and the 8 control groups appeared to be more similar than they are with the 4 cold groups. X-axis and y-axis show the 12 treatment groups and the 8 control groups.
 
 ## VENN Diagram
 The Venn diagram includes both up and down regulated genes in common. First we create a series of genes that are up and down-regulated from each of our earlier pairwise comparisons.
@@ -373,7 +405,8 @@ prettyvenn=venn.diagram(
 grid.newpage()
 grid.draw(prettyvenn)
 ```
-Figure6. Venn diagram showing 652 common genes that are up-regulated in both 4 cool and 8 heat samples of *Breviolum psygmophiulm*. There is a total of 3963 up-regulated genes in the cool samples, and a total of 2852 up-regulated genes in the heat samples. 
+
+**Figure6.** Venn diagram showing 652 common genes that are up-regulated in both 4 cool and 8 heat samples of *Breviolum psygmophiulm*. There is a total of 3963 up-regulated genes in the cool samples, and a total of 2852 up-regulated genes in the heat samples. 
 
 Repeat the same steps to make a Venn diagram for the down-regulated genes. 
 ```{r}
@@ -400,15 +433,16 @@ prettyvenn=venn.diagram(
 grid.newpage()
 grid.draw(prettyvenn)
 ```
-Figure7. Venn diagram showing 703 common genes that are down-regulated in both 4 cool and 8 heat samples of *Breviolum psygmophiulm*. There is a total of 3200 up-regulated genes in the cool samples, and a total of 2563 up-regulated genes in the heat samples. 
 
-## Heatmap for Gene EXpression
+**Figure7.** Venn diagram showing 703 common genes that are down-regulated in both 4 cool and 8 heat samples of *Breviolum psygmophiulm*. There is a total of 3200 up-regulated genes in the cool samples, and a total of 2563 up-regulated genes in the heat samples. 
+
+## Heatmap for Gene Expression
 First, let's read in the Rld and P-values again.
 ```{r}
 rldpvals <- read.csv(file="Bpsy2021_RLDandPVALS.csv", row.names=1)
-head(rldpvals)
+#head(rldpvals)
 rld_site= rldpvals[,1:20]
-head(rld_site)
+#head(rld_site)
 ```
 Create a heatmap for the top 100 deferentially expressed genes in the heat treatment.
 ```{r}
@@ -429,7 +463,8 @@ col0=colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(1
 
 pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F, main = "Gene Expression of Heat Treatment")
 ```
-Figure8. *Breviolum psygmophiulm* gene expression difference in cool, heat, and control group in comparision with the top 100 differentially expressed gene from heat treatment group. Rows are genes and columns are sampels. Blue indicates genes that are down-regulated, and orange indicates genes that are up-regulated. The differentially expressed genes in the 8 heat groups have opposite expression from the 4 cool groups, and the 8 control groups.
+
+**Figure8.** *Breviolum psygmophiulm* gene expression difference in cool, heat, and control group in comparision with the top 100 differentially expressed gene from heat treatment group. Rows are genes and columns are sampels. Blue indicates genes that are down-regulated, and orange indicates genes that are up-regulated. The differentially expressed genes in the 8 heat groups have opposite expression from the 4 cool groups, and the 8 control groups.
 
 Create a heatmap for the top 100 deferentially expressed genes in the cool treatment.
 ```{r}
@@ -450,7 +485,8 @@ col0=colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(1
 
 pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F, main = "Gene Expression of Cool Treatment")
 ```
-Figure9. *Breviolum psygmophiulm* gene expression difference in cool, heat, and control group in comparision with the top 100 differentially expressed gene from heat treatment group. Rows are genes and columns are sampels. Blue indicates genes that are down-regulated, and orange indicates genes that are up-regulated. The differentially expressed in the 4 cool sample groups have opposite expression from the 8 control and the 8 heat groups.
+
+**Figure9.** *Breviolum psygmophiulm* gene expression difference in cool, heat, and control group in comparision with the top 100 differentially expressed gene from heat treatment group. Rows are genes and columns are sampels. Blue indicates genes that are down-regulated, and orange indicates genes that are up-regulated. The differentially expressed in the 4 cool sample groups have opposite expression from the 8 control and the 8 heat groups.
 
 Lastly, create a heatmap for genes that are common in both treatments.
 ```{r}
@@ -470,7 +506,8 @@ col0=colorRampPalette(rev(c("chocolate1","#FEE090","grey10", "cyan3","cyan")))(1
 
 pheatmap(explc,cluster_cols=T,scale="row",color=col0, show_rownames = F, main = "Gene Expression in Common Genes")
 ```
-Figure10. *Breviolum psygmophiulm* gene expression difference in cool, heat, and control group in comparision with genes that are common in both cold and heat treatments. Rows are genes and columns are sampels. Blue indicates genes that are down-regulated, and orange indicates genes that are up-regulated. Between the 4 cool samples and the 8 heat samples, there seem to have half of the genes that have opposite expression, and the other half of the genes with similar expression pattern. For the groups of genes that have opposite expression between the cold and heat samples, the control groups genes are netiehr up nor down-regulated. For the groups of genes that have similar expression pattern in both heat and cold treatment groups, the control group genes have opposite gene expression pattern than the treatment groups.
+
+**Figure10.** *Breviolum psygmophiulm* gene expression difference in cool, heat, and control group in comparision with genes that are common in both cold and heat treatments. Rows are genes and columns are sampels. Blue indicates genes that are down-regulated, and orange indicates genes that are up-regulated. Between the 4 cool samples and the 8 heat samples, there seem to have half of the genes that have opposite expression, and the other half of the genes with similar expression pattern. For the groups of genes that have opposite expression between the cold and heat samples, the control groups genes are netiehr up nor down-regulated. For the groups of genes that have similar expression pattern in both heat and cold treatment groups, the control group genes have opposite gene expression pattern than the treatment groups.
 
 ## Conclusion
 Using the DESeq analysis, we found 3963 genes that are over-expressed, and 3200 genes that are under-expressed in the 4 cool samples of *Breviolum psygmophiulm*. In the 8 heat treated samples, we found 2852 genes that are over-expressed, and 2563 that are under-expressed. Among the up-regulated genes in both cool and heat treated groups, there are 652 common genes. Among the down-regulated genes in both cool and heat treatment groups, there are 703 common genes. Heatmaps of gene expression show that there are groups of genes with opposite expressions, and groups of genes with similar expression between the heat and cool groups. 
