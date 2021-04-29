@@ -13,9 +13,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 After running DeSeq and WGCNA, we ran GO enrichment to identify the function of the genes that were differentially expressed as a result of the experimental treatment.  
 
-According to the original GO script that we built this analysis from: "GO uses continuous measure of significance (such as fold-change or -log(p-value) ) to identify GO categories that are significantly enriched with either up- or down-regulated genes. The advantage- no need to impose arbitrary signficance curoffs."  
+According to the original GO script that we built this analysis from: "GO uses continuous measure of significance (such as fold-change or -log(p-value) ) to identify GO categories that are significantly enriched with either up- or down-regulated genes. The advantage- no need to impose arbitrary significance cutoffs."  
 
-As you will see in the coming analysis, the result of running GO is a heirarchacal tree that clusters GO categories by shared genes.  
+As you will see in the coming analysis, the result of running GO is a hierarchical tree that clusters GO categories by shared genes.  
 
 Let's take a look!  
 
@@ -54,9 +54,9 @@ source("gomwu.functions.R")
 
 We'll be using this file input template for all the rest of our GO analyses.  To reiterate the annotations in the code block: 
 the "input" file is where you input the .csv file from your prior analysis (in this case, the DeSeq), 
-the "goAnnotations" file is the annotated transcriptome for the target organism.  We used a file compiled by the Davies Lab for B. psygmospilum.
+the "goAnnotations" file is the annotated transcriptome for the target organism.  We used a file compiled by the Davies Lab for B. psygmophilum.
 the "goDatabase" can be downloaded from the url in the code block annotation,
-and the "goDivision" is where you specify your disired GO division.  You can see here we are starting with BP.  
+and the "goDivision" is where you specify your desired GO division.  You can see here we are starting with BP.  
 
 **The next step is to calculate the stats necessary to create figures.**  
 
@@ -79,7 +79,7 @@ Since we standardized names in the last code block, there isn't much you will ne
 
 This stats block takes a while-- especially for BP-- so if possible run this section through a remote computing cluster (the SCC if you're at BU), or ensure that your local computer can handle the job.  
 
-If you have GO terms, congrats!! you can now plot your results.  If you do not get any GO terms, you can change your cutoffs to encompase a broader range of results, or change the type of analysis you are running.  For this analysis we will run a Man Whitney (MWU) test.    
+If you have GO terms, congrats!! you can now plot your results.  If you do not get any GO terms, you can change your cutoffs to encompass a broader range of results, or change the type of analysis you are running.  For this analysis we will run a Mann Whitney (MWU) test.    
 
 **Next, we're going to plot our results.**
 
@@ -118,7 +118,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            smallest=5,   
            clusterCutHeight=0.25,
 )
-# 32 GO terms at 10% FDR
+
 ```
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 results=gomwuPlot(input,goAnnotations,goDivision,
@@ -148,7 +148,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            smallest=5,  
            clusterCutHeight=0.25,
 )
-# 44 GO terms at 10% FDR
+
 ```
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 results=gomwuPlot(input,goAnnotations,goDivision,
@@ -180,7 +180,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            smallest=5, 
            clusterCutHeight=0.25,
 )
-# 26 GO terms at 10% FDR
+
 ```
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 results=gomwuPlot(input,goAnnotations,goDivision,
@@ -210,7 +210,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            smallest=5,   
            clusterCutHeight=0.25,
 )
-# 25 GO terms at 10% FDR
+
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
@@ -241,7 +241,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            smallest=5,
            clusterCutHeight=0.25,
 )
-# 6 GO terms at 10% FDR
+
 ```
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 results=gomwuPlot(input,goAnnotations,goDivision,
@@ -281,7 +281,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            clusterCutHeight=0.25,
            Module=TRUE,Alternative="g"
 )
-#3 GO terms at 10% FDR
+
 ```
 ```{r, message=FALSE, warning=FALSE}
 results=gomwuPlot(input,goAnnotations,goDivision,
@@ -313,7 +313,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            smallest=5,
            clusterCutHeight=0.25,
            Module=TRUE,Alternative="g"
-) # 9 GO terms at 10% FDR
+) 
 
 results=gomwuPlot(input,goAnnotations,goDivision,
                   absValue=0.001,
@@ -350,7 +350,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            smallest=5,
            clusterCutHeight=0.25,
            Module=TRUE,Alternative="g"
-) #10 GO terms at 10% FDR
+) 
 
 results=gomwuPlot(input,goAnnotations,goDivision,
                   absValue=0.001,
@@ -379,7 +379,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            smallest=5,
            clusterCutHeight=0.25,
            Module=TRUE,Alternative="g"
-) #5 GO terms at 10% FDR
+) 
 
 results=gomwuPlot(input,goAnnotations,goDivision,
                   absValue=0.001,
@@ -408,7 +408,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            smallest=5,
            clusterCutHeight=0.25,
            Module=TRUE,Alternative="g"
-) #12 GO terms at 10% FDR
+) 
 
 results=gomwuPlot(input,goAnnotations,goDivision,
                   absValue=0.001,
@@ -440,7 +440,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            smallest=5,
            clusterCutHeight=0.25,
            Module=TRUE,Alternative="g"
-) #11 GO terms at 10% FDR
+) 
 
 results=gomwuPlot(input,goAnnotations,goDivision,
                   absValue=0.001,
@@ -469,7 +469,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            smallest=5,
            clusterCutHeight=0.25,
            Module=TRUE,Alternative="g"
-) #7 GO terms at 10% FDR
+) 
 
 results=gomwuPlot(input,goAnnotations,goDivision,
                   absValue=0.001,
@@ -498,7 +498,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            smallest=5,
            clusterCutHeight=0.25,
            Module=TRUE,Alternative="g"
-) #6 GO terms at 10% FDR
+) 
 
 results=gomwuPlot(input,goAnnotations,goDivision,
                   absValue=0.001,
@@ -561,7 +561,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            smallest=5,
            clusterCutHeight=0.25,
            Module=TRUE,Alternative="g"
-) #21 GO terms at 10% FDR
+) 
 
 results=gomwuPlot(input,goAnnotations,goDivision,
                   absValue=0.001,
@@ -590,7 +590,7 @@ gomwuStats(input, goDatabase, goAnnotations, goDivision,
            smallest=5,
            clusterCutHeight=0.25,
            Module=TRUE,Alternative="g"
-) #24 GO terms at 10% FDR
+) 
 
 results=gomwuPlot(input,goAnnotations,goDivision,
                   absValue=0.001,
@@ -608,7 +608,7 @@ Figure 3.18: GO enrichment results for the Brown module, looking at CC. Text thi
 # Conclusion
 Based on the GO enrichment of the heat and cold stress samples, different pathways are activated by different kinds of thermal stress. The genes upregulated in the cold stress samples were mainly involved in mRNA processing, RNA splicing, and protein folding. Genes involved in photosynthesis, ion transport, and transmembrane transport were downregulated in cold stress. In the heat stress, many of the upregulated genes were involved in protein and macromolecule localization and transport. The downregulated genes were mainly found in the ribosome and involved in peptide and macromolecule synthesis. 
 
-Using the modules from the WGCNA can give a more detailed picture on what expression is best correlated with the treatments. The turquoise module is perfectly positively correlated with the cool treatment while the magenta module is strongly correlated with it as well but negatively (-0.9). Greenyellow is strongly correlated with downregulation in heat (-0.99) while brown is strongly correlated with upregulation in heat (0.92). Brown is also strongly correlated with cell density (0.97) so GO analysis can provide some insight whether the gene expression is affected by thermal stress or cell density. Similar to the results of GO from Deseq, the turquoise module contained genes mainly involved in mRNA processing and RNA splicing. Magenta module genes were involved with photosynthesis and metabolic/catabolic process. This is not unexpected as thermal stress can disrupt the photosystems. The greenyellow module contained genes mainly involved with the ribosome and peptide and macromolecule synthesis. The brown module is not as clear as kME files were used and they displayed vastly more GO terms than the other modules so the significance is not certain. This module contained photosynthesis related genes as well as of particular interest, response to reactive oxygen species. Based on these results, it appears that the brown module expression is influenced by heat treatment more than cell density as the genes are involved in stress response. The correlation with cell density is likely due to the fact that higher cell density is correlated with heat exposure. Overall, all of our GO enrichment indicates a diverse response to thermal stress that varies by whether it is cold or heat stress.
+Using the modules from the WGCNA can give a more detailed picture on what expression is best correlated with the treatments. The turquoise module is perfectly positively correlated with the cool treatment while the magenta module is strongly correlated with it as well but negatively (-0.9). Greenyellow is strongly correlated with downregulation in heat (-0.99) while brown is strongly correlated with upregulation in heat (0.92). Brown is also strongly correlated with cell density (0.97) so GO analysis can provide some insight whether the gene expression is affected by thermal stress or cell density. Similar to the results of GO from Deseq, the turquoise module contained genes mainly involved in mRNA processing and RNA splicing. Magenta module genes were involved with photosynthesis and metabolic/catabolic process. This is not unexpected as thermal stress can disrupt the photosystems. The greenyellow module contained genes mainly involved with the ribosome and peptide and macromolecule synthesis. The brown module is not as clear as kME files were used and they displayed vastly more GO terms than the other modules so the significance is not certain. This module contained photosynthesis related genes as well as of particular interest. Based on these results, it appears that the brown module expression is influenced by heat treatment more than cell density as the genes are involved in stress response. The correlation with cell density is likely due to the fact that higher cell density is correlated with heat exposure. Overall, all of our GO enrichment indicates a diverse response to thermal stress that varies by whether it is cold or heat stress.
 
 
 
